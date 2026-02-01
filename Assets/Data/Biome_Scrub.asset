@@ -13,3 +13,7 @@ MonoBehaviour:
   m_Name: Biome_Scrub
   m_EditorClassIdentifier: Assembly-CSharp::BiomeConfigSO
   Name: Scrub
+  MinIntensity: 0.5
+  MaxIntensity: 1
+  MinDecayRate: 0.01
+  MaxDecayRate: 0.1

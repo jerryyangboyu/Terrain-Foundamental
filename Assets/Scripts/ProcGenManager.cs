@@ -24,6 +24,7 @@ public class ProcGenManager : MonoBehaviour
 #if UNITY_EDITOR
     byte[,] BiomeMap;
     float[,] BiomeStrengths;
+    Texture2D BiomeMapPreview;
 #endif
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -41,6 +42,12 @@ public class ProcGenManager : MonoBehaviour
 #if UNITY_EDITOR
     public void RegenerateWorld()
     {
+        if (Config == null || TargetTerrain == null)
+        {
+            Debug.LogError("Missing config or target terrain.");
+            return;
+        }
+
         int mapResolution = TargetTerrain.terrainData.heightmapResolution;
 
         PerformBiomGeneration(mapResolution);
@@ -49,6 +56,18 @@ public class ProcGenManager : MonoBehaviour
 
     private void PerformBiomGeneration(int mapResolution)
     {
+        if (Config.Biomes == null || Config.Biomes.Count == 0)
+        {
+            Debug.LogError("No biomes configured.");
+            return;
+        }
+
+        if (Config.BiomeWeights == null || Config.BiomeWeights.Length < Config.Biomes.Count)
+        {
+            Debug.LogError("BiomeWeights count must match Biomes count.");
+            return;
+        }
+
         BiomeMap = new byte[mapResolution, mapResolution];
         BiomeStrengths = new float[mapResolution, mapResolution];
 
@@ -78,6 +97,18 @@ public class ProcGenManager : MonoBehaviour
             PerformSpwanIndividualBiome(biomeIndex, mapResolution);
         }
 
+        Texture2D biomeMap = new(mapResolution, mapResolution, TextureFormat.RGB24, false);
+        for (int y = 0; y < mapResolution; y++)
+        {
+            for (int x = 0; x < mapResolution; x++)
+            {
+                float hue = (float) BiomeMap[x, y] / (float) Config.Biomes.Count;
+                biomeMap.SetPixel(x, y, Color.HSVToRGB(hue, .75f, .75f));
+            }
+        }
+        biomeMap.Apply();
+
+        System.IO.File.WriteAllBytes("BiomeMap.png", biomeMap.EncodeToPNG());
     }
 
     private void PerformSpwanIndividualBiome(byte biomeIndex, int mapResolution)
@@ -123,10 +154,10 @@ public class ProcGenManager : MonoBehaviour
                 // allow our biomes to be a little bit patchy
                 visited[neighbourLocation.x, neighbourLocation.y] = true;
 
-                // work out neighbour strength
-                float neighbourStrength = targetIntensity[workingLocation.x, workingLocation.y] - Random.Range(biomeConfig.MinDecayRate, biomeConfig.MaxDecayRate);
-                if (neighbourStrength < 0)
-                    continue;
+                float decayAmount = Random.Range(biomeConfig.MinDecayRate, biomeConfig.MaxDecayRate) * NeighbourOffsets[neighbourIndex].magnitude;
+                float neighbourStrength = targetIntensity[workingLocation.x, workingLocation.y] - decayAmount;
+                targetIntensity[neighbourLocation.x, neighbourLocation.y] = neighbourStrength;
+                if (neighbourStrength <= 0) continue;
 
                 workingList.Enqueue(neighbourLocation);
                 
