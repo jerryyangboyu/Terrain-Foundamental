@@ -120,21 +120,18 @@ public class ProcGenManager : MonoBehaviour
                 if (visited[neighbourLocation.x, neighbourLocation.y])
                     continue;
 
+                // allow our biomes to be a little bit patchy
+                visited[neighbourLocation.x, neighbourLocation.y] = true;
+
                 // work out neighbour strength
                 float neighbourStrength = targetIntensity[workingLocation.x, workingLocation.y] - Random.Range(biomeConfig.MinDecayRate, biomeConfig.MaxDecayRate);
                 if (neighbourStrength < 0)
-                {
-                    // allow our biomes to be a little bit patchy
-                    visited[neighbourLocation.x, neighbourLocation.y] = true;
                     continue;
-                }
 
                 workingList.Enqueue(neighbourLocation);
                 
             }
         }
-
-
 
     }
 
