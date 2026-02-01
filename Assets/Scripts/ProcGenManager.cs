@@ -22,9 +22,13 @@ public class ProcGenManager : MonoBehaviour
     };
 
 #if UNITY_EDITOR
+    // base map
+    byte[,] BiomeMapLowResolution;
+    float[,] BiomeStrengthsLowResolution;
+
+    // upscaled map
     byte[,] BiomeMap;
     float[,] BiomeStrengths;
-    Texture2D BiomeMapPreview;
 #endif
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -42,34 +46,83 @@ public class ProcGenManager : MonoBehaviour
 #if UNITY_EDITOR
     public void RegenerateWorld()
     {
-        if (Config == null || TargetTerrain == null)
-        {
-            Debug.LogError("Missing config or target terrain.");
-            return;
-        }
+        int baseMapResolution = (int) Config.biomeMapResolution;
+        int mapResolutionSize = TargetTerrain.terrainData.heightmapResolution;
 
-        int mapResolution = TargetTerrain.terrainData.heightmapResolution;
+        // base map generation
+        PerformBiomGenerationLowResoluion(baseMapResolution);
+        OutputPngFile("BaseTerrainMap", BiomeMapLowResolution, baseMapResolution);
 
-        PerformBiomGeneration(mapResolution);
-
+        // upscale
+        PerformUpscaleBiomeMap(baseMapResolution, mapResolutionSize);
+        OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolutionSize);
     }
 
-    private void PerformBiomGeneration(int mapResolution)
+    private void PerformUpscaleBiomeMap(int lowResolution, int highResolution)
     {
-        if (Config.Biomes == null || Config.Biomes.Count == 0)
+        BiomeMap = new byte[highResolution, highResolution];
+        BiomeStrengths = new float[highResolution, highResolution];
+
+        float mapScale = (float) lowResolution / highResolution;
+
+        for (int y = 0; y < highResolution; y++)
         {
-            Debug.LogError("No biomes configured.");
-            return;
+            float scaledY = y * mapScale;
+            int yAtLowRes = Mathf.FloorToInt(scaledY);
+            float yFraction = scaledY - yAtLowRes;
+
+            for (int x = 0; x < highResolution; x++)
+            {
+                float scaledX = x * mapScale;
+                int xAtLowRes = Mathf.FloorToInt(scaledX);
+                float xFraction = scaledX - xAtLowRes;
+
+                // simple upscale
+                // BiomeMap[x, y] = BiomeMapLowResolution[xAtLowRes, yAtLowRes];
+
+                // bi-linear interpolation
+                BiomeMap[x, y] = CalculateHighResBiomeIndex(lowResolution, xAtLowRes, yAtLowRes, xFraction, yFraction);
+            }
+        }
+    }
+
+    private byte CalculateHighResBiomeIndex(int lowResMapSize, int lowX, int lowY, float fractionX, float fractionY)
+    {
+        float bottomLeft = BiomeMapLowResolution[lowX, lowY];
+        float upperLeft = (lowY + 1 < lowResMapSize) ? BiomeMapLowResolution[lowX, lowY + 1] : bottomLeft;
+        float bottomRight = (lowX + 1 < lowResMapSize) ? BiomeMapLowResolution[lowX + 1, lowY] : bottomLeft;
+
+        float upperRight;
+        if (lowX + 1 >= lowResMapSize) upperRight = upperLeft;
+        else if (lowY + 1 >= lowResMapSize) upperRight = bottomRight;
+        else upperRight = BiomeMapLowResolution[lowX + 1, lowY + 1];
+
+        float interpolatedIndex =   bottomLeft * (1 - fractionX) * (1 - fractionY)
+                      + upperLeft * (1 - fractionX)* fractionY
+                      + bottomRight * fractionX * (1 - fractionY)
+                      + upperRight * fractionX * fractionY;
+
+        float[] candidateBiomes = new float[] { bottomLeft, bottomRight, upperLeft, upperRight };
+        float bestBiome = candidateBiomes[0];
+        float biomeDelta = float.MaxValue;
+        foreach (var candidateBiome in candidateBiomes)
+        {
+            var delta = Mathf.Abs(interpolatedIndex - candidateBiome);
+            if (delta < biomeDelta)
+            {
+                biomeDelta = delta;
+                bestBiome = candidateBiome;
+            }
         }
 
-        if (Config.BiomeWeights == null || Config.BiomeWeights.Length < Config.Biomes.Count)
-        {
-            Debug.LogError("BiomeWeights count must match Biomes count.");
-            return;
-        }
 
-        BiomeMap = new byte[mapResolution, mapResolution];
-        BiomeStrengths = new float[mapResolution, mapResolution];
+        return (byte) bestBiome;
+    }
+
+    private void PerformBiomGenerationLowResoluion(int mapResolution)
+    {
+        BiomeMapLowResolution = new byte[mapResolution, mapResolution];
+        BiomeStrengthsLowResolution = new float[mapResolution, mapResolution];
 
         int numSeedPoints = Mathf.FloorToInt(mapResolution * mapResolution * Config.BiomeSeedPointDensity);
         List<byte> biomesToSpawn = new(numSeedPoints);
@@ -96,19 +149,22 @@ public class ProcGenManager : MonoBehaviour
 
             PerformSpwanIndividualBiome(biomeIndex, mapResolution);
         }
+    }
 
-        Texture2D biomeMap = new(mapResolution, mapResolution, TextureFormat.RGB24, false);
-        for (int y = 0; y < mapResolution; y++)
+    private void OutputPngFile(string fileName, byte[,] resolutonMap, int resolutionSize)
+    {
+        Texture2D biomeMap = new(resolutionSize, resolutionSize, TextureFormat.RGB24, false);
+        for (int y = 0; y < resolutionSize; y++)
         {
-            for (int x = 0; x < mapResolution; x++)
+            for (int x = 0; x < resolutionSize; x++)
             {
-                float hue = (float) BiomeMap[x, y] / (float) Config.Biomes.Count;
+                float hue = (float) resolutonMap[x, y] / (float) Config.Biomes.Count;
                 biomeMap.SetPixel(x, y, Color.HSVToRGB(hue, .75f, .75f));
             }
         }
         biomeMap.Apply();
 
-        System.IO.File.WriteAllBytes("BiomeMap.png", biomeMap.EncodeToPNG());
+        System.IO.File.WriteAllBytes($"Images/{fileName}.png", biomeMap.EncodeToPNG());
     }
 
     private void PerformSpwanIndividualBiome(byte biomeIndex, int mapResolution)
@@ -138,8 +194,8 @@ public class ProcGenManager : MonoBehaviour
             Vector2Int workingLocation = workingList.Dequeue();
 
             visited[workingLocation.x, workingLocation.y] = true;
-            BiomeMap[workingLocation.x, workingLocation.y] = biomeIndex;
-            BiomeStrengths[workingLocation.x, workingLocation.y] = targetIntensity[workingLocation.x, workingLocation.y];
+            BiomeMapLowResolution[workingLocation.x, workingLocation.y] = biomeIndex;
+            BiomeStrengthsLowResolution[workingLocation.x, workingLocation.y] = targetIntensity[workingLocation.x, workingLocation.y];
 
             // traverse the neighbours
             for (int neighbourIndex = 0; neighbourIndex < NeighbourOffsets.Length; ++neighbourIndex)

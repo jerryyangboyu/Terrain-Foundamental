@@ -14,6 +14,15 @@ public class ProcGenConfigSO : ScriptableObject
 {
     public List<BiomeConfig> Biomes;
 
+    public enum BiomeMapBaseResolution
+    {
+        Size_64x64 = 64,
+        Size_256x256 = 256,
+        Size_512x512 = 512
+    }
+
+    public BiomeMapBaseResolution biomeMapResolution = BiomeMapBaseResolution.Size_64x64;
+
     [Range(0f, 1f)] public float BiomeSeedPointDensity = 0.1f;
 
     public float[] BiomeWeights
