@@ -15,5 +15,5 @@ MonoBehaviour:
   Name: Scrub
   MinIntensity: 0.5
   MaxIntensity: 1
-  MinDecayRate: 0.01
-  MaxDecayRate: 0.1
+  MinDecayRate: 0.1
+  MaxDecayRate: 0.2
