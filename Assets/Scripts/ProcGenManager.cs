@@ -8,6 +8,9 @@ public class ProcGenManager : MonoBehaviour
 {
     [SerializeField] ProcGenConfigSO Config;
     [SerializeField] Terrain TargetTerrain;
+    [SerializeField] bool OutputBiomePngFiles = false;
+    [SerializeField] bool ShowBiomeOverlayInScene = true;
+    [SerializeField, Min(0f)] float BiomeOverlayHeightOffset = 5f;
 
     private static readonly Vector2Int[] NeighbourOffsets = new Vector2Int[]
     {
@@ -29,6 +32,7 @@ public class ProcGenManager : MonoBehaviour
     // upscaled map
     byte[,] BiomeMap;
     float[,] BiomeStrengths;
+    BiomeOverlayVisualizer BiomeOverlayVisualizer;
 #endif
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -51,11 +55,28 @@ public class ProcGenManager : MonoBehaviour
 
         // base map generation
         PerformBiomGenerationLowResoluion(baseMapResolution);
-        OutputPngFile("BaseTerrainMap", BiomeMapLowResolution, baseMapResolution);
+        if (OutputBiomePngFiles)
+        {
+            OutputPngFile("BaseTerrainMap", BiomeMapLowResolution, baseMapResolution);
+        }
 
         // upscale
         PerformUpscaleBiomeMap(baseMapResolution, mapResolutionSize);
-        OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolutionSize);
+        if (OutputBiomePngFiles)
+        {
+            OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolutionSize);
+        }
+
+        if (ShowBiomeOverlayInScene)
+        {
+            BiomeOverlayVisualizer ??= new BiomeOverlayVisualizer();
+            Texture2D overlayTexture = BuildBiomeTexture(BiomeMap, mapResolutionSize);
+            BiomeOverlayVisualizer.Render(transform, TargetTerrain, overlayTexture, BiomeOverlayHeightOffset);
+        }
+        else
+        {
+            BiomeOverlayVisualizer?.SetVisible(false);
+        }
     }
 
     private void PerformUpscaleBiomeMap(int lowResolution, int highResolution)
@@ -153,18 +174,27 @@ public class ProcGenManager : MonoBehaviour
 
     private void OutputPngFile(string fileName, byte[,] resolutonMap, int resolutionSize)
     {
+        Texture2D biomeMap = BuildBiomeTexture(resolutonMap, resolutionSize);
+        System.IO.Directory.CreateDirectory("Images");
+        System.IO.File.WriteAllBytes($"Images/{fileName}.png", biomeMap.EncodeToPNG());
+        DestroyImmediate(biomeMap);
+    }
+
+    private Texture2D BuildBiomeTexture(byte[,] resolutionMap, int resolutionSize)
+    {
         Texture2D biomeMap = new(resolutionSize, resolutionSize, TextureFormat.RGB24, false);
+        biomeMap.filterMode = FilterMode.Point;
+        biomeMap.wrapMode = TextureWrapMode.Clamp;
         for (int y = 0; y < resolutionSize; y++)
         {
             for (int x = 0; x < resolutionSize; x++)
             {
-                float hue = (float) resolutonMap[x, y] / (float) Config.Biomes.Count;
+                float hue = (float) resolutionMap[x, y] / (float) Config.Biomes.Count;
                 biomeMap.SetPixel(x, y, Color.HSVToRGB(hue, .75f, .75f));
             }
         }
         biomeMap.Apply();
-
-        System.IO.File.WriteAllBytes($"Images/{fileName}.png", biomeMap.EncodeToPNG());
+        return biomeMap;
     }
 
     private void PerformSpwanIndividualBiome(byte biomeIndex, int mapResolution)
