@@ -77,6 +77,45 @@ public class ProcGenManager : MonoBehaviour
         {
             BiomeOverlayVisualizer?.SetVisible(false);
         }
+
+        PerformHeightMapModification(mapResolutionSize);
+    }
+
+    private void PerformHeightMapModification(int mapResolutionSize)
+    {
+        var heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolutionSize, mapResolutionSize);
+
+        if (Config.InitialHeightModifier != null)
+        {
+            var modifiers = Config.InitialHeightModifier.GetComponents<BaseHeightMapModifier>();
+            foreach (var modifier in modifiers)
+            {
+                modifier.Execute(mapResolutionSize, heightMap, TargetTerrain.terrainData.heightmapScale);
+            }
+        }
+
+        for (int biomeIndex = 0; biomeIndex < Config.Biomes.Count; ++biomeIndex)
+        {
+            var biomeConfig = Config.Biomes[biomeIndex].Biome;
+            if (biomeConfig.HeightModifier == null) continue;
+
+            var modifiers = biomeConfig.HeightModifier.GetComponents<BaseHeightMapModifier>();
+            foreach (var modifier in modifiers)
+            {
+                modifier.Execute(mapResolutionSize, heightMap, TargetTerrain.terrainData.heightmapScale, BiomeMap, biomeConfig, biomeIndex);
+            }
+        }
+
+        if (Config.HeightPostProcessingModifier != null)
+        {
+            var modifers = Config.HeightPostProcessingModifier.GetComponents<BaseHeightMapModifier>();
+            foreach (var modifier in modifers)
+            {
+                modifier.Execute(mapResolutionSize, heightMap, TargetTerrain.terrainData.heightmapScale);
+            }
+        }
+
+        TargetTerrain.terrainData.SetHeights(0, 0, heightMap);
     }
 
     private void PerformUpscaleBiomeMap(int lowResolution, int highResolution)
@@ -257,5 +296,7 @@ public class ProcGenManager : MonoBehaviour
         return location.x >= 0 && location.y >= 0 &&
                location.x < mapResolution && location.y < mapResolution;
     }
+
+
 #endif
 }
