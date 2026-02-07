@@ -15,5 +15,6 @@ MonoBehaviour:
   Name: Bush
   MinIntensity: 0.5
   MaxIntensity: 1
-  MinDecayRate: 0.1
-  MaxDecayRate: 0.2
+  MinDecayRate: 0.05
+  MaxDecayRate: 0.15
+  HeightModifier: {fileID: 0}

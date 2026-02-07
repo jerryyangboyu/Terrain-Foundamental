@@ -10,7 +10,6 @@ public class ProcGenManager : MonoBehaviour
     [SerializeField] Terrain TargetTerrain;
     [SerializeField] bool OutputBiomePngFiles = false;
     [SerializeField] bool ShowBiomeOverlayInScene = true;
-    [SerializeField, Min(0f)] float BiomeOverlayHeightOffset = 5f;
 
     private static readonly Vector2Int[] NeighbourOffsets = new Vector2Int[]
     {
@@ -32,7 +31,7 @@ public class ProcGenManager : MonoBehaviour
     // upscaled map
     byte[,] BiomeMap;
     float[,] BiomeStrengths;
-    BiomeOverlayVisualizer BiomeOverlayVisualizer;
+    BiomeOverlayVisualizer biomeOverlayVisualizer;
 #endif
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -69,13 +68,8 @@ public class ProcGenManager : MonoBehaviour
 
         if (ShowBiomeOverlayInScene)
         {
-            BiomeOverlayVisualizer ??= new BiomeOverlayVisualizer();
-            Texture2D overlayTexture = BuildBiomeTexture(BiomeMap, mapResolutionSize);
-            BiomeOverlayVisualizer.Render(transform, TargetTerrain, overlayTexture, BiomeOverlayHeightOffset);
-        }
-        else
-        {
-            BiomeOverlayVisualizer?.SetVisible(false);
+            biomeOverlayVisualizer ??= new BiomeOverlayVisualizer();
+            biomeOverlayVisualizer.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, Config.Biomes.Count);
         }
 
         PerformHeightMapModification(mapResolutionSize);
@@ -228,8 +222,7 @@ public class ProcGenManager : MonoBehaviour
         {
             for (int x = 0; x < resolutionSize; x++)
             {
-                float hue = (float) resolutionMap[x, y] / (float) Config.Biomes.Count;
-                biomeMap.SetPixel(x, y, Color.HSVToRGB(hue, .75f, .75f));
+                biomeMap.SetPixel(x, y, BiomeOverlayVisualizer.GetBiomeColor(resolutionMap[x, y], Config.Biomes.Count));
             }
         }
         biomeMap.Apply();
