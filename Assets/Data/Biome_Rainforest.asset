@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Biome_Rainforest
   m_EditorClassIdentifier: Assembly-CSharp::BiomeConfigSO
   Name: Rainforest
-  MinIntensity: 0.5
+  MinIntensity: 0.69
   MaxIntensity: 1
-  MinDecayRate: 0.1
-  MaxDecayRate: 0.2
+  MinDecayRate: 0.05
+  MaxDecayRate: 0.15
+  UseCustomPreviewColor: 1
+  PreviewColor: {r: 0, g: 0.3921569, b: 0, a: 1}
+  HeightModifier: {fileID: 1459419569558651806, guid: 139f7ff5cfd634ff7aa9d379fe4caa83, type: 3}

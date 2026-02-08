@@ -20,10 +20,11 @@ public class ProcGenConfigSO : ScriptableObject
         Size_256x256 = 256,
         Size_512x512 = 512
     }
-
     public BiomeMapBaseResolution biomeMapResolution = BiomeMapBaseResolution.Size_64x64;
-
     [Range(0f, 1f)] public float BiomeSeedPointDensity = 0.1f;
+
+    public GameObject InitialHeightModifier;
+    public GameObject HeightPostProcessingModifier;
 
     public float[] BiomeWeights
     {

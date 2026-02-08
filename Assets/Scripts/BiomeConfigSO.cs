@@ -12,4 +12,10 @@ public class BiomeConfigSO : ScriptableObject
     // the lower the rate, the more it is going to spread out
     [Range(0f, 1f)] public float MinDecayRate = 0.01f;
     [Range(0f, 1f)] public float MaxDecayRate = 0.02f;
+
+    [Header("Preview")]
+    public bool UseCustomPreviewColor = false;
+    public Color PreviewColor = Color.white;
+
+    public GameObject HeightModifier;
 }

@@ -9,7 +9,7 @@ public class ProcGenManagerEditor: Editor
     {
         DrawDefaultInspector();
 
-        if (GUILayout.Button("Regenerate World"))
+        if (GUILayout.Button("Regenerate"))
         {
             ProcGenManager targetManager = serializedObject.targetObject as ProcGenManager;
             targetManager.RegenerateWorld();
