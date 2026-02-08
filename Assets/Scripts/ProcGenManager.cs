@@ -136,7 +136,7 @@ public class ProcGenManager : MonoBehaviour
             var modifers = Config.HeightPostProcessingModifier.GetComponents<BaseHeightMapModifier>();
             foreach (var modifier in modifers)
             {
-                modifier.Execute(mapResolutionSize, heightMap, TargetTerrain.terrainData.heightmapScale);
+                modifier.Execute(mapResolutionSize, heightMap, TargetTerrain.terrainData.heightmapScale, BiomeMap, null, -1);
             }
         }
 

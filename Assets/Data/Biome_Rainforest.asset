@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Biome_Rainforest
   m_EditorClassIdentifier: Assembly-CSharp::BiomeConfigSO
   Name: Rainforest
-  MinIntensity: 0.5
+  MinIntensity: 0.69
   MaxIntensity: 1
   MinDecayRate: 0.05
   MaxDecayRate: 0.15

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Biome_Bush
   m_EditorClassIdentifier: Assembly-CSharp::BiomeConfigSO
   Name: Bush
-  MinIntensity: 0.5
-  MaxIntensity: 1
+  MinIntensity: 0.133
+  MaxIntensity: 0.575
   MinDecayRate: 0.05
   MaxDecayRate: 0.15
   UseCustomPreviewColor: 1

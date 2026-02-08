@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Biome_GrassyPlains
   m_EditorClassIdentifier: Assembly-CSharp::BiomeConfigSO
   Name: GrassyPlains
-  MinIntensity: 0.5
+  MinIntensity: 0.735
   MaxIntensity: 1
   MinDecayRate: 0.05
   MaxDecayRate: 0.15
