@@ -323,12 +323,7 @@ public class ProcGenManager : MonoBehaviour
                 // allow our biomes to be a little bit patchy
                 visited[neighbourLocation.x, neighbourLocation.y] = true;
 
-                float decayAmount = Random.Range(biomeConfig.MinDecayRate, biomeConfig.MaxDecayRate) * NeighbourOffsets[neighbourIndex].magnitude;
-                float neighbourStrength = targetIntensity[workingLocation.x, workingLocation.y] - decayAmount;
-                targetIntensity[neighbourLocation.x, neighbourLocation.y] = neighbourStrength;
-                if (neighbourStrength <= 0) continue;
-
-                workingList.Enqueue(neighbourLocation);
+                // TODO: implement the spwan biome algorithm
                 
             }
         }
