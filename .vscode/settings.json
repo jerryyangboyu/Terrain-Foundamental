@@ -67,5 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Terrain-Foundamental.slnx"
+    "dotnet.defaultSolution": "Terrain-Foundamental.slnx",
+    "dotnet.preferCSharpExtension": true
 }

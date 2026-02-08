@@ -5,12 +5,26 @@ using UnityEditor;
 
 public class BiomeOverlayVisualizer
 {
+    private static BiomeOverlayVisualizer instance;
     private TerrainLayer[] biomePreviewLayers;
     private int cachedBiomeCount = -1;
     private int cachedBiomeColorHash = 0;
 #if UNITY_EDITOR
     private const string PreviewAssetsFolder = "Assets/Data/BiomePreview";
 #endif
+
+    public static BiomeOverlayVisualizer Instance
+    {
+        get
+        {
+            instance ??= new BiomeOverlayVisualizer();
+            return instance;
+        }
+    }
+
+    private BiomeOverlayVisualizer()
+    {
+    }
 
     public void RenderOnTerrain(Terrain targetTerrain, byte[,] resolutionMap, int resolutionSize, Color[] biomeColors)
     {

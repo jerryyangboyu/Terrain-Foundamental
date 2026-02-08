@@ -10,6 +10,7 @@ public class ProcGenManager : MonoBehaviour
     [SerializeField] Terrain TargetTerrain;
     [SerializeField] bool OutputBiomePngFiles = false;
     [SerializeField] bool ShowBiomeOverlayInScene = true;
+    [SerializeField] bool RegenerateBiome = true;
 
     private static readonly Vector2Int[] NeighbourOffsets = new Vector2Int[]
     {
@@ -31,7 +32,6 @@ public class ProcGenManager : MonoBehaviour
     // upscaled map
     byte[,] BiomeMap;
     float[,] BiomeStrengths;
-    BiomeOverlayVisualizer biomeOverlayVisualizer;
 #endif
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -49,36 +49,26 @@ public class ProcGenManager : MonoBehaviour
 #if UNITY_EDITOR
     public void RegenerateWorld()
     {
-        RegenerateWorldInternal(regenerateBiome: true);
-    }
-
-    public void RegenerateHeightMapOnly()
-    {
-        RegenerateWorldInternal(regenerateBiome: false);
-    }
-
-    private void RegenerateWorldInternal(bool regenerateBiome)
-    {
         int baseMapResolution = (int) Config.biomeMapResolution;
         int mapResolutionSize = TargetTerrain.terrainData.heightmapResolution;
 
-        if (regenerateBiome || !HasCachedBiomeMap(mapResolutionSize))
+        if (RegenerateBiome)
         {
-            if (!regenerateBiome)
-            {
-                Debug.LogWarning("Biome map cache is missing or outdated. Regenerating biome map before height-only update.");
-            }
             RegenerateBiomeMap(baseMapResolution, mapResolutionSize);
+            BiomeMapCacheStore.Instance.Save(BiomeMap, mapResolutionSize);
+        }
+        else if (BiomeMapCacheStore.Instance.TryLoad(mapResolutionSize, out byte[,] restoredBiomeMap))
+        {
+            BiomeMap = restoredBiomeMap;
+            BiomeStrengths = new float[mapResolutionSize, mapResolutionSize];
+        }
+        else
+        {
+            Debug.LogWarning("Biome map cache is missing or outdated. Height map regeneration was skipped because RegenerateBiome is disabled.");
+            return;
         }
 
         PerformHeightMapModification(mapResolutionSize);
-    }
-
-    private bool HasCachedBiomeMap(int mapResolutionSize)
-    {
-        return BiomeMap != null
-               && BiomeMap.GetLength(0) == mapResolutionSize
-               && BiomeMap.GetLength(1) == mapResolutionSize;
     }
 
     private void RegenerateBiomeMap(int baseMapResolution, int mapResolutionSize)
@@ -101,8 +91,7 @@ public class ProcGenManager : MonoBehaviour
 
         if (ShowBiomeOverlayInScene)
         {
-            biomeOverlayVisualizer ??= new BiomeOverlayVisualizer();
-            biomeOverlayVisualizer.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, biomeColors);
+            BiomeOverlayVisualizer.Instance.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, biomeColors);
         }
     }
 

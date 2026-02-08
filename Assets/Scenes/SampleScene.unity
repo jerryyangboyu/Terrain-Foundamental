@@ -573,6 +573,7 @@ MonoBehaviour:
   TargetTerrain: {fileID: 70171288}
   OutputBiomePngFiles: 0
   ShowBiomeOverlayInScene: 1
+  RegenerateBiome: 1
 --- !u!134 &1048652485
 PhysicsMaterial:
   m_ObjectHideFlags: 0
