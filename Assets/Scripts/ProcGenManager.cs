@@ -51,48 +51,57 @@ public class ProcGenManager : MonoBehaviour
     {
         int baseMapResolution = (int) Config.biomeMapResolution;
         int mapResolutionSize = TargetTerrain.terrainData.heightmapResolution;
-
-        if (RegenerateBiome)
-        {
-            RegenerateBiomeMap(baseMapResolution, mapResolutionSize);
-            BiomeMapCacheStore.Instance.Save(BiomeMap, mapResolutionSize);
-        }
-        else if (BiomeMapCacheStore.Instance.TryLoad(mapResolutionSize, out byte[,] restoredBiomeMap))
-        {
-            BiomeMap = restoredBiomeMap;
-            BiomeStrengths = new float[mapResolutionSize, mapResolutionSize];
-        }
-        else
-        {
-            Debug.LogWarning("Biome map cache is missing or outdated. Height map regeneration was skipped because RegenerateBiome is disabled.");
-            return;
-        }
-
-        PerformHeightMapModification(mapResolutionSize);
-    }
-
-    private void RegenerateBiomeMap(int baseMapResolution, int mapResolutionSize)
-    {
         Color[] biomeColors = BuildBiomeColors();
 
-        // base map generation
-        PerformBiomGenerationLowResoluion(baseMapResolution);
+        // Generate biome sections
+        PerformBiomeGeneration(baseMapResolution, mapResolutionSize);
+
+        // Optional save biome map to disk
         if (OutputBiomePngFiles)
         {
             OutputPngFile("BaseTerrainMap", BiomeMapLowResolution, baseMapResolution, biomeColors);
-        }
-
-        // upscale
-        PerformUpscaleBiomeMap(baseMapResolution, mapResolutionSize);
-        if (OutputBiomePngFiles)
-        {
             OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolutionSize, biomeColors);
         }
 
+        // Visualize by assigning a unique color to each biome
         if (ShowBiomeOverlayInScene)
         {
             BiomeOverlayVisualizer.Instance.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, biomeColors);
         }
+
+        // Generate heightmap
+        PerformHeightMapModification(mapResolutionSize);
+    }
+
+    private void PerformBiomeGeneration(int baseMapResolution, int mapResolutionSize)
+    {
+        if (RegenerateBiome)
+        {
+            RegenerateBiomeMap(baseMapResolution, mapResolutionSize);
+        }
+        else if (BiomeMap == null)
+        {
+            if (BiomeMapCacheStore.Instance.TryLoad(mapResolutionSize, out byte[,] restoredBiomeMap))
+            {
+                BiomeMap = restoredBiomeMap;
+                BiomeStrengths = new float[mapResolutionSize, mapResolutionSize];
+            }
+            else
+            {
+                Debug.LogWarning("Biome map cache is missing or outdated. Regenerating.");
+                RegenerateBiomeMap(baseMapResolution, mapResolutionSize);
+            }
+        }
+    }
+
+    private void RegenerateBiomeMap(int baseMapResolution, int mapResolutionSize)
+    {
+        // base map generation
+        PerformBiomGenerationLowResoluion(baseMapResolution);
+        // upscale
+        PerformUpscaleBiomeMap(baseMapResolution, mapResolutionSize);
+        // save to disk
+        BiomeMapCacheStore.Instance.Save(BiomeMap, mapResolutionSize);
     }
 
     private void PerformHeightMapModification(int mapResolutionSize)
