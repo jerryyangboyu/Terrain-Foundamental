@@ -49,9 +49,40 @@ public class ProcGenManager : MonoBehaviour
 #if UNITY_EDITOR
     public void RegenerateWorld()
     {
+        RegenerateWorldInternal(regenerateBiome: true);
+    }
+
+    public void RegenerateHeightMapOnly()
+    {
+        RegenerateWorldInternal(regenerateBiome: false);
+    }
+
+    private void RegenerateWorldInternal(bool regenerateBiome)
+    {
         int baseMapResolution = (int) Config.biomeMapResolution;
         int mapResolutionSize = TargetTerrain.terrainData.heightmapResolution;
 
+        if (regenerateBiome || !HasCachedBiomeMap(mapResolutionSize))
+        {
+            if (!regenerateBiome)
+            {
+                Debug.LogWarning("Biome map cache is missing or outdated. Regenerating biome map before height-only update.");
+            }
+            RegenerateBiomeMap(baseMapResolution, mapResolutionSize);
+        }
+
+        PerformHeightMapModification(mapResolutionSize);
+    }
+
+    private bool HasCachedBiomeMap(int mapResolutionSize)
+    {
+        return BiomeMap != null
+               && BiomeMap.GetLength(0) == mapResolutionSize
+               && BiomeMap.GetLength(1) == mapResolutionSize;
+    }
+
+    private void RegenerateBiomeMap(int baseMapResolution, int mapResolutionSize)
+    {
         // base map generation
         PerformBiomGenerationLowResoluion(baseMapResolution);
         if (OutputBiomePngFiles)
@@ -71,8 +102,6 @@ public class ProcGenManager : MonoBehaviour
             biomeOverlayVisualizer ??= new BiomeOverlayVisualizer();
             biomeOverlayVisualizer.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, Config.Biomes.Count);
         }
-
-        PerformHeightMapModification(mapResolutionSize);
     }
 
     private void PerformHeightMapModification(int mapResolutionSize)

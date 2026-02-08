@@ -14,5 +14,11 @@ public class ProcGenManagerEditor: Editor
             ProcGenManager targetManager = serializedObject.targetObject as ProcGenManager;
             targetManager.RegenerateWorld();
         }
+
+        if (GUILayout.Button("Regenerate HeightMap Only"))
+        {
+            ProcGenManager targetManager = serializedObject.targetObject as ProcGenManager;
+            targetManager.RegenerateHeightMapOnly();
+        }
     }
 }
