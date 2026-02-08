@@ -17,4 +17,6 @@ MonoBehaviour:
   MaxIntensity: 1
   MinDecayRate: 0.05
   MaxDecayRate: 0.15
+  UseCustomPreviewColor: 1
+  PreviewColor: {r: 0, g: 1, b: 0.4980392, a: 1}
   HeightModifier: {fileID: 1459419569558651806, guid: 81a7701ccb0664e40be020d03cd08dcb, type: 3}

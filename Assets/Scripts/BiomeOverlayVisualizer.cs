@@ -7,19 +7,21 @@ public class BiomeOverlayVisualizer
 {
     private TerrainLayer[] biomePreviewLayers;
     private int cachedBiomeCount = -1;
+    private int cachedBiomeColorHash = 0;
 #if UNITY_EDITOR
     private const string PreviewAssetsFolder = "Assets/Data/BiomePreview";
 #endif
 
-    public void RenderOnTerrain(Terrain targetTerrain, byte[,] resolutionMap, int resolutionSize, int biomeCount)
+    public void RenderOnTerrain(Terrain targetTerrain, byte[,] resolutionMap, int resolutionSize, Color[] biomeColors)
     {
+        int biomeCount = biomeColors != null ? biomeColors.Length : 0;
         if (targetTerrain == null || targetTerrain.terrainData == null || resolutionMap == null || biomeCount <= 0 || resolutionSize <= 0)
         {
             return;
         }
 
         TerrainData terrainData = targetTerrain.terrainData;
-        EnsureBiomePreviewLayers(terrainData, biomeCount);
+        EnsureBiomePreviewLayers(terrainData, biomeColors);
 
         int alphaResolution = terrainData.alphamapResolution;
         float[,,] alphamaps = new float[alphaResolution, alphaResolution, biomeCount];
@@ -39,15 +41,27 @@ public class BiomeOverlayVisualizer
         terrainData.SetAlphamaps(0, 0, alphamaps);
     }
 
-    public static Color GetBiomeColor(int biomeIndex, int biomeCount)
+    public static Color GetDefaultBiomeColor(int biomeIndex, int biomeCount)
     {
         float hue = (float)biomeIndex / Mathf.Max(1, biomeCount);
         return Color.HSVToRGB(hue, .75f, .75f);
     }
 
-    private void EnsureBiomePreviewLayers(TerrainData terrainData, int biomeCount)
+    public static Color GetBiomeColor(int biomeIndex, int biomeCount, BiomeConfigSO biomeConfig)
     {
-        if (biomePreviewLayers != null && cachedBiomeCount == biomeCount)
+        if (biomeConfig != null && biomeConfig.UseCustomPreviewColor)
+        {
+            return biomeConfig.PreviewColor;
+        }
+
+        return GetDefaultBiomeColor(biomeIndex, biomeCount);
+    }
+
+    private void EnsureBiomePreviewLayers(TerrainData terrainData, Color[] biomeColors)
+    {
+        int biomeCount = biomeColors.Length;
+        int biomeColorHash = ComputeBiomeColorHash(biomeColors);
+        if (biomePreviewLayers != null && cachedBiomeCount == biomeCount && cachedBiomeColorHash == biomeColorHash)
         {
             terrainData.terrainLayers = biomePreviewLayers;
             return;
@@ -55,13 +69,14 @@ public class BiomeOverlayVisualizer
 
         biomePreviewLayers = new TerrainLayer[biomeCount];
         cachedBiomeCount = biomeCount;
+        cachedBiomeColorHash = biomeColorHash;
 
 #if UNITY_EDITOR
         EnsurePreviewAssetFolderExists();
 
         for (int biomeIndex = 0; biomeIndex < biomeCount; biomeIndex++)
         {
-            Color biomeColor = GetBiomeColor(biomeIndex, biomeCount);
+            Color biomeColor = biomeColors[biomeIndex];
 
             Texture2D texture = LoadOrCreatePreviewTexture(biomeIndex, biomeColor);
             TerrainLayer terrainLayer = LoadOrCreatePreviewLayer(biomeIndex);
@@ -76,6 +91,23 @@ public class BiomeOverlayVisualizer
         EditorUtility.SetDirty(terrainData);
         AssetDatabase.SaveAssets();
 #endif
+    }
+
+    private static int ComputeBiomeColorHash(Color[] biomeColors)
+    {
+        unchecked
+        {
+            int hash = 17;
+            for (int i = 0; i < biomeColors.Length; i++)
+            {
+                Color32 color = biomeColors[i];
+                hash = hash * 31 + color.r;
+                hash = hash * 31 + color.g;
+                hash = hash * 31 + color.b;
+                hash = hash * 31 + color.a;
+            }
+            return hash;
+        }
     }
 
 #if UNITY_EDITOR

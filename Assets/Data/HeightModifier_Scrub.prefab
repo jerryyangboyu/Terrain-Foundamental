@@ -45,10 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NoiseHeightMapModifier
   Strength: 1
-  amplitude: 20
-  xFrequency: 0.05
-  yFrequency: 0.05
-  octaves: 5
+  amplitude: 15
+  xFrequency: 0.04
+  yFrequency: 0.04
+  octaves: 2
   xLacunlarity: 2
   yLacunlarity: 2
   persistence: 0.5

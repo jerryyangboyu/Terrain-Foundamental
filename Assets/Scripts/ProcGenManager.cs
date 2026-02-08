@@ -83,24 +83,26 @@ public class ProcGenManager : MonoBehaviour
 
     private void RegenerateBiomeMap(int baseMapResolution, int mapResolutionSize)
     {
+        Color[] biomeColors = BuildBiomeColors();
+
         // base map generation
         PerformBiomGenerationLowResoluion(baseMapResolution);
         if (OutputBiomePngFiles)
         {
-            OutputPngFile("BaseTerrainMap", BiomeMapLowResolution, baseMapResolution);
+            OutputPngFile("BaseTerrainMap", BiomeMapLowResolution, baseMapResolution, biomeColors);
         }
 
         // upscale
         PerformUpscaleBiomeMap(baseMapResolution, mapResolutionSize);
         if (OutputBiomePngFiles)
         {
-            OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolutionSize);
+            OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolutionSize, biomeColors);
         }
 
         if (ShowBiomeOverlayInScene)
         {
             biomeOverlayVisualizer ??= new BiomeOverlayVisualizer();
-            biomeOverlayVisualizer.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, Config.Biomes.Count);
+            biomeOverlayVisualizer.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, biomeColors);
         }
     }
 
@@ -234,28 +236,50 @@ public class ProcGenManager : MonoBehaviour
         }
     }
 
-    private void OutputPngFile(string fileName, byte[,] resolutonMap, int resolutionSize)
+    private void OutputPngFile(string fileName, byte[,] resolutonMap, int resolutionSize, Color[] biomeColors)
     {
-        Texture2D biomeMap = BuildBiomeTexture(resolutonMap, resolutionSize);
+        Texture2D biomeMap = BuildBiomeTexture(resolutonMap, resolutionSize, biomeColors);
         System.IO.Directory.CreateDirectory("Images");
         System.IO.File.WriteAllBytes($"Images/{fileName}.png", biomeMap.EncodeToPNG());
         DestroyImmediate(biomeMap);
     }
 
-    private Texture2D BuildBiomeTexture(byte[,] resolutionMap, int resolutionSize)
+    private Texture2D BuildBiomeTexture(byte[,] resolutionMap, int resolutionSize, Color[] biomeColors)
     {
         Texture2D biomeMap = new(resolutionSize, resolutionSize, TextureFormat.RGB24, false);
         biomeMap.filterMode = FilterMode.Point;
         biomeMap.wrapMode = TextureWrapMode.Clamp;
+        bool hasBiomeColors = biomeColors != null && biomeColors.Length > 0;
         for (int y = 0; y < resolutionSize; y++)
         {
             for (int x = 0; x < resolutionSize; x++)
             {
-                biomeMap.SetPixel(x, y, BiomeOverlayVisualizer.GetBiomeColor(resolutionMap[x, y], Config.Biomes.Count));
+                if (!hasBiomeColors)
+                {
+                    biomeMap.SetPixel(x, y, Color.black);
+                    continue;
+                }
+
+                int biomeIndex = Mathf.Clamp(resolutionMap[x, y], 0, biomeColors.Length - 1);
+                biomeMap.SetPixel(x, y, biomeColors[biomeIndex]);
             }
         }
         biomeMap.Apply();
         return biomeMap;
+    }
+
+    private Color[] BuildBiomeColors()
+    {
+        int biomeCount = Config.Biomes.Count;
+        Color[] biomeColors = new Color[biomeCount];
+
+        for (int biomeIndex = 0; biomeIndex < biomeCount; biomeIndex++)
+        {
+            var biome = Config.Biomes[biomeIndex].Biome;
+            biomeColors[biomeIndex] = BiomeOverlayVisualizer.GetBiomeColor(biomeIndex, biomeCount, biome);
+        }
+
+        return biomeColors;
     }
 
     private void PerformSpwanIndividualBiome(byte biomeIndex, int mapResolution)
