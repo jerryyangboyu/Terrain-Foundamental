@@ -171,35 +171,8 @@ public class ProcGenManager : MonoBehaviour
 
     private byte CalculateHighResBiomeIndex(int lowResMapSize, int lowX, int lowY, float fractionX, float fractionY)
     {
-        float bottomLeft = BiomeMapLowResolution[lowX, lowY];
-        float upperLeft = (lowY + 1 < lowResMapSize) ? BiomeMapLowResolution[lowX, lowY + 1] : bottomLeft;
-        float bottomRight = (lowX + 1 < lowResMapSize) ? BiomeMapLowResolution[lowX + 1, lowY] : bottomLeft;
-
-        float upperRight;
-        if (lowX + 1 >= lowResMapSize) upperRight = upperLeft;
-        else if (lowY + 1 >= lowResMapSize) upperRight = bottomRight;
-        else upperRight = BiomeMapLowResolution[lowX + 1, lowY + 1];
-
-        float interpolatedIndex =   bottomLeft * (1 - fractionX) * (1 - fractionY)
-                      + upperLeft * (1 - fractionX)* fractionY
-                      + bottomRight * fractionX * (1 - fractionY)
-                      + upperRight * fractionX * fractionY;
-
-        float[] candidateBiomes = new float[] { bottomLeft, bottomRight, upperLeft, upperRight };
-        float bestBiome = candidateBiomes[0];
-        float biomeDelta = float.MaxValue;
-        foreach (var candidateBiome in candidateBiomes)
-        {
-            var delta = Mathf.Abs(interpolatedIndex - candidateBiome);
-            if (delta < biomeDelta)
-            {
-                biomeDelta = delta;
-                bestBiome = candidateBiome;
-            }
-        }
-
-
-        return (byte) bestBiome;
+        // TODO: implement linear interpolation algorithm
+        return BiomeMapLowResolution[lowX, lowY];
     }
 
     private void PerformBiomGenerationLowResoluion(int mapResolution)
