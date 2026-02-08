@@ -12,8 +12,8 @@ public class RandomHeightMapModifier : BaseHeightMapModifier
             for (int x = 0; x < mapResolutionSize; x++)
             {
                 if (biomeIndex >= 0 && biomeMap[x, y] != biomeIndex) continue;
-                float newHeight = heightMap[x, y] + (Random.Range(-HeightDelta, HeightDelta) / heightmapScale.y);
-                heightMap[x, y] = Mathf.Lerp(heightMap[x, y], newHeight, Strength);
+                float newHeight = heightMap[y, x] + (Random.Range(-HeightDelta, HeightDelta) / heightmapScale.y);
+                heightMap[y, x] = Mathf.Lerp(heightMap[y, x], newHeight, Strength);
             }
         }
     }

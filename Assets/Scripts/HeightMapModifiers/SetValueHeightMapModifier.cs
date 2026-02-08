@@ -12,7 +12,7 @@ public class SetValueHeightMapModifier: BaseHeightMapModifier
             {
                 if (biomeIndex >= 0 && biomeMap[x, y] != biomeIndex) continue;
                 float newHeight = TargetHeight / heightmapScale.y;
-                heightMap[x, y] = Mathf.Lerp(heightMap[x, y], newHeight, Strength);
+                heightMap[y, x] = Mathf.Lerp(heightMap[y, x], newHeight, Strength);
             }
         }
     }

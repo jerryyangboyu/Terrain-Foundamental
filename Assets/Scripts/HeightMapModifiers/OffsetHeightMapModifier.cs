@@ -11,8 +11,8 @@ public class OffsetHeightMapModifier : BaseHeightMapModifier
             for (int x = 0; x < mapResolutionSize; x++)
             {
                 if (biomeIndex >= 0 && biomeMap[x, y] != biomeIndex) continue;
-                float newHeight = heightMap[x, y] + (OffsetAmount / heightmapScale.y);
-                heightMap[x, y] = Mathf.Lerp(heightMap[x, y], newHeight, Strength);
+                float newHeight = heightMap[y, x] + (OffsetAmount / heightmapScale.y);
+                heightMap[y, x] = Mathf.Lerp(heightMap[y, x], newHeight, Strength);
             }
         }
     }

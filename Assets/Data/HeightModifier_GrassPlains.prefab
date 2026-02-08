@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7539819308024961561
+--- !u!1 &1459419569558651806
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6281823345764840904}
-  - component: {fileID: -7357499940729218212}
+  - component: {fileID: 500731677969657389}
+  - component: {fileID: -4194500540168962899}
   m_Layer: 0
-  m_Name: ClearHeightModifer
+  m_Name: HeightModifier_GrassPlains
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6281823345764840904
+--- !u!4 &500731677969657389
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7539819308024961561}
+  m_GameObject: {fileID: 1459419569558651806}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,17 +32,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-7357499940729218212
+--- !u!114 &-4194500540168962899
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7539819308024961561}
+  m_GameObject: {fileID: 1459419569558651806}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc5705d84ec134aeeb23a9707fc095b7, type: 3}
+  m_Script: {fileID: 11500000, guid: eb82915fa376a4f569922490ea20b36d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SetValueHeightMapModifier
+  m_EditorClassIdentifier: Assembly-CSharp::NoiseHeightMapModifier
   Strength: 1
-  TargetHeight: 0
+  amplitude: 20
+  xFrequency: 0.05
+  yFrequency: 0.05
+  octaves: 5
+  xLacunlarity: 2
+  yLacunlarity: 2
+  persistence: 0.5
