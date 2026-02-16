@@ -6,9 +6,9 @@ TerrainLayer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Layer_GrassyPlains_grassy-plains-
-  m_DiffuseTexture: {fileID: 2800000, guid: b39336e67b68db14aa4a8a7f883e5aff, type: 3}
-  m_NormalMapTexture: {fileID: 2800000, guid: 9a1568052101f2f48ba76e7342adc3f3, type: 3}
+  m_Name: Layer_GrassyPlains_grassy-plains-grass-soil
+  m_DiffuseTexture: {fileID: 2800000, guid: bde7423cb35c64746b6b24c63040dcb0, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: b5fff5575723f4a40bfa0f147cb9c27f, type: 3}
   m_MaskMapTexture: {fileID: 0}
   m_TileSize: {x: 2, y: 2}
   m_TileOffset: {x: 0, y: 0}

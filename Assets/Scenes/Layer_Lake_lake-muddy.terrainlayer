@@ -6,9 +6,9 @@ TerrainLayer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Layer_Rainforest_rainforest-grass-dry
-  m_DiffuseTexture: {fileID: 2800000, guid: 7e6fff2112f33d748962082012d11cce, type: 3}
-  m_NormalMapTexture: {fileID: 2800000, guid: d835c61db4c94444eabef9cf95e8a7c4, type: 3}
+  m_Name: Layer_Lake_lake-muddy
+  m_DiffuseTexture: {fileID: 2800000, guid: 311fa94216ea77342a20e99b01ed6e69, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: 86f7d07dde38b154188fd60359df541e, type: 3}
   m_MaskMapTexture: {fileID: 0}
   m_TileSize: {x: 2, y: 2}
   m_TileOffset: {x: 0, y: 0}
