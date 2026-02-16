@@ -17,6 +17,14 @@ MonoBehaviour:
   MaxIntensity: 1
   MinDecayRate: 0.05
   MaxDecayRate: 0.15
-  UseCustomPreviewColor: 1
+  UseCustomPreviewColor: 0
   PreviewColor: {r: 0, g: 0.3921569, b: 0, a: 1}
   HeightModifier: {fileID: 1459419569558651806, guid: 139f7ff5cfd634ff7aa9d379fe4caa83, type: 3}
+  TerrainPainter: {fileID: 6543067333105782680, guid: 519f60e9ecb8e4d2dac6f70a5611fe76, type: 3}
+  Textures:
+  - UniqueID: rainforest-grass-base
+    Diffuse: {fileID: 2800000, guid: e318f31bebce62d48a648da3f8ba56c9, type: 3}
+    NormalMap: {fileID: 2800000, guid: eb70932bab3d971408c011dbb45767a9, type: 3}
+  - UniqueID: rainforest-grass-dry
+    Diffuse: {fileID: 2800000, guid: 7e6fff2112f33d748962082012d11cce, type: 3}
+    NormalMap: {fileID: 2800000, guid: d835c61db4c94444eabef9cf95e8a7c4, type: 3}

@@ -17,6 +17,11 @@ MonoBehaviour:
   MaxIntensity: 0.575
   MinDecayRate: 0.05
   MaxDecayRate: 0.15
-  UseCustomPreviewColor: 1
+  UseCustomPreviewColor: 0
   PreviewColor: {r: 0.5450981, g: 0.2705882, b: 0.07450981, a: 1}
   HeightModifier: {fileID: 1459419569558651806, guid: febf9ab2eefae4e16b7196588571f297, type: 3}
+  TerrainPainter: {fileID: 6543067333105782680, guid: 79e2b5e096a2c4f3ea0fc1355355373b, type: 3}
+  Textures:
+  - UniqueID: bush-a
+    Diffuse: {fileID: 2800000, guid: eb04da16cbc16c9488332336fb11b965, type: 3}
+    NormalMap: {fileID: 2800000, guid: e1ef57925b58e624bb0ddcc506f28e94, type: 3}

@@ -20,3 +20,5 @@ MonoBehaviour:
   UseCustomPreviewColor: 1
   PreviewColor: {r: 0.3921569, g: 0.5843138, b: 0.9294118, a: 1}
   HeightModifier: {fileID: 2808279032707956941, guid: cb4df6ba410e8471ca5effdaedc77bdd, type: 3}
+  TerrainPainter: {fileID: 6543067333105782680, guid: 6115512b3ed5041ad932e6d5f333196d, type: 3}
+  Textures: []

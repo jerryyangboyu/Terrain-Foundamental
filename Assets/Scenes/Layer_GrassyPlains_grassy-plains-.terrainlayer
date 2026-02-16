@@ -6,11 +6,11 @@ TerrainLayer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BiomePreviewLayer_3
-  m_DiffuseTexture: {fileID: 2800000, guid: 1814da6a7c85c4aa6ba24f9078c3ae1f, type: 2}
-  m_NormalMapTexture: {fileID: 0}
+  m_Name: Layer_GrassyPlains_grassy-plains-
+  m_DiffuseTexture: {fileID: 2800000, guid: b39336e67b68db14aa4a8a7f883e5aff, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: 9a1568052101f2f48ba76e7342adc3f3, type: 3}
   m_MaskMapTexture: {fileID: 0}
-  m_TileSize: {x: 1, y: 1}
+  m_TileSize: {x: 2, y: 2}
   m_TileOffset: {x: 0, y: 0}
   m_Specular: {r: 0, g: 0, b: 0, a: 0}
   m_Metallic: 0
