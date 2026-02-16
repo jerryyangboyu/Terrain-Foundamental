@@ -25,9 +25,13 @@ public class RandomTexturePainter: BaseTexturePainter
 
         for (int y = 0; y < alphamapResolution; ++y)
         {
+            int heightMapY = Mathf.FloorToInt((float) y * mapResolution / alphamapResolution);
+
             for (int x = 0; x < alphamapResolution; ++x)
             {
-                if (biomeIndex >= 0 && biomeMap[x, y] != biomeIndex)
+                int heightMapX = Mathf.FloorToInt((float) x * mapResolution / alphamapResolution);
+
+                if (biomeIndex >= 0 && biomeMap[heightMapX, heightMapY] != biomeIndex)
                     continue;
 
                 string randomTextureID = biome.Textures[Random.Range(0, biome.Textures.Count)].UniqueID;

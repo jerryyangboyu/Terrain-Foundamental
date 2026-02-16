@@ -94,6 +94,17 @@ public class ProcGenManager : MonoBehaviour
         float[,] heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
         float[,,] alphaMaps = TargetTerrain.terrainData.GetAlphamaps(0, 0, alphamapResolution, alphamapResolution);
 
+        for (int y = 0; y < alphamapResolution; ++y)
+        {
+            for (int x = 0; x < alphamapResolution; ++x)
+            {
+                for (int layerIndex = 0; layerIndex < TargetTerrain.terrainData.alphamapLayers; layerIndex++)
+                {
+                    alphaMaps[x, y, layerIndex] = 0;
+                }
+            }
+        }
+
         for (int biomeIndex = 0; biomeIndex < Config.Biomes.Count; ++biomeIndex)
         {
             var biomeConfig = Config.Biomes[biomeIndex].Biome;
