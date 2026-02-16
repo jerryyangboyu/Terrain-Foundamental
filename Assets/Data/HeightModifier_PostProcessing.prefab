@@ -62,5 +62,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab714d3819b494f4986b5bc3333f4b80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RandomHeightMapModifier
-  Strength: 1
+  Strength: 0.5
   HeightDelta: 0.5

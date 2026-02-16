@@ -47,7 +47,7 @@ MonoBehaviour:
   Strength: 1
   amplitude: 10
   xFrequency: 0.02
-  yFrequency: 0.025
+  yFrequency: 0.02
   octaves: 1
   xLacunlarity: 2
   yLacunlarity: 2
