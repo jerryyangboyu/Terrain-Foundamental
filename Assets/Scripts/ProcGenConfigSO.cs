@@ -25,6 +25,7 @@ public class ProcGenConfigSO : ScriptableObject
 
     public GameObject InitialHeightModifier;
     public GameObject HeightPostProcessingModifier;
+    public GameObject PaintingPostProcessingModifier;
 
     public float[] BiomeWeights
     {

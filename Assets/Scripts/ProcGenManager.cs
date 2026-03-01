@@ -89,15 +89,23 @@ public class ProcGenManager : MonoBehaviour
         PerformTerrainPainting(mapResolution, alphamapResolution);
     }
 
-    private void PerformTerrainPainting(int mapResolution, int alphamapResolution)
+    private void PerformTerrainPainting(int mapResolution, int alphaMapResolution)
     {
         float[,] heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
-        float[,,] alphaMaps = TargetTerrain.terrainData.GetAlphamaps(0, 0, alphamapResolution, alphamapResolution);
+        float[,,] alphaMaps = TargetTerrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
 
-        for (int y = 0; y < alphamapResolution; ++y)
+        float[,] slopeMap = new float[alphaMapResolution, alphaMapResolution];
+
+        for (int y = 0; y < alphaMapResolution; ++y)
         {
-            for (int x = 0; x < alphamapResolution; ++x)
+            for (int x = 0; x < alphaMapResolution; ++x)
             {
+                // flat -> y value is 1, vertical (pointing to side) -> y value is 0
+                float interpolatedX = (float)x / alphaMapResolution;
+                float interpolatedY = (float)y / alphaMapResolution;
+                slopeMap[x, y] = TargetTerrain.terrainData.GetInterpolatedNormal(interpolatedX, interpolatedY).y;
+
+                // zero out layer settings
                 for (int layerIndex = 0; layerIndex < TargetTerrain.terrainData.alphamapLayers; layerIndex++)
                 {
                     alphaMaps[x, y, layerIndex] = 0;
@@ -111,10 +119,21 @@ public class ProcGenManager : MonoBehaviour
             if (biomeConfig.TerrainPainter == null) continue;
 
             var modifiers = biomeConfig.TerrainPainter.GetComponents<BaseTexturePainter>();
-            foreach (var modifier in modifiers)
+            foreach(var modifier in modifiers)
             {
-                modifier.Execute(mapResolution, heightMap, TargetTerrain.terrainData.heightmapScale, alphaMaps, alphamapResolution, BiomeTexture2TerrainLayerIndex, BiomeMap, biomeConfig, biomeIndex);
+                modifier.Execute(this, mapResolution, heightMap, TargetTerrain.terrainData.heightmapScale, slopeMap, alphaMaps, alphaMapResolution, BiomeMap, biomeIndex, biomeConfig);
             }
+        }
+
+        // run texture post processing
+        if (Config.PaintingPostProcessingModifier != null)
+        {
+            BaseTexturePainter[] modifiers = Config.PaintingPostProcessingModifier.GetComponents<BaseTexturePainter>();
+
+            foreach(var modifier in modifiers)
+            {
+                modifier.Execute(this, mapResolution, heightMap, TargetTerrain.terrainData.heightmapScale, slopeMap, alphaMaps, alphaMapResolution);
+            }    
         }
 
         TargetTerrain.terrainData.SetAlphamaps(0, 0, alphaMaps);
@@ -438,6 +457,11 @@ public class ProcGenManager : MonoBehaviour
             }
         }
 
+    }
+
+    public int GetLayerForTexture(string uniqueID)
+    {
+        return BiomeTexture2TerrainLayerIndex[uniqueID];
     }
 
     private bool CheckBoundaryValidity(Vector2Int location, int mapResolution)
