@@ -572,8 +572,8 @@ MonoBehaviour:
   Config: {fileID: 11400000, guid: f0a0e616b803a496ca4788dbc4271560, type: 2}
   TargetTerrain: {fileID: 70171288}
   OutputBiomePngFiles: 0
-  UseSimpleBiomeVisualization: 0
-  RegenerateBiome: 0
+  UseSimpleBiomeVisualization: 1
+  RegenerateBiome: 1
   RegenerateLayers: 1
 --- !u!134 &1048652485
 PhysicsMaterial:
