@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af4c6a580619b4fcea4dc74f59a9bc4b, type: 3}
+  m_Name: Biome_Rainforest
+  m_EditorClassIdentifier: Assembly-CSharp::BiomeConfigSO
+  Name: Rainforest
+  MinIntensity: 0.5
+  MaxIntensity: 1
+  MinDecayRate: 0.1
+  MaxDecayRate: 0.2
+  UseCustomPreviewColor: 1
+  PreviewColor: {r: 0, g: 0.3921569, b: 0, a: 1}
+  HeightModifier: {fileID: 1459419569558651806, guid: 139f7ff5cfd634ff7aa9d379fe4caa83, type: 3}
+  TerrainPainter: {fileID: 6543067333105782680, guid: 519f60e9ecb8e4d2dac6f70a5611fe76, type: 3}
+  Textures:
+  - UniqueID: rainforest-grass-moss
+    Diffuse: {fileID: 2800000, guid: d44cec25420524046b0137655ed7f307, type: 3}
+    NormalMap: {fileID: 2800000, guid: 2114e87dbc5872042860b1588217688e, type: 3}
+  - UniqueID: rainforest-grass-b
+    Diffuse: {fileID: 2800000, guid: e318f31bebce62d48a648da3f8ba56c9, type: 3}
+    NormalMap: {fileID: 2800000, guid: eb70932bab3d971408c011dbb45767a9, type: 3}
+  - UniqueID: rainforest-soil-rocks
+    Diffuse: {fileID: 2800000, guid: e257fa53a087b404d8579225e1c7cddb, type: 3}
+    NormalMap: {fileID: 2800000, guid: 773f0cf0efc85a14a9f70e559642746f, type: 3}
