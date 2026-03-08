@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3988319789976183774}
   - component: {fileID: -712622702913159428}
   m_Layer: 0
-  m_Name: GlobalTerrainPainter_HeightBands
+  m_Name: GlobalTerrainPainter_HeightRules
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,39 +46,154 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HeightTexturePainter
   Strength: 1
   NormalizeAgainstCurrentTerrainRange: 1
-  Bands:
+  TextureRules:
   - TextureID: lake-sand
-    MinHeight: 0
-    MaxHeight: 0.16
-    BlendRange: 0.08
-    Strength: 1
+    BaseWeight: 1.2
+    WeightAtZero: 1
+    WeightAtLow: 0.7
+    WeightAtMid: 0
+    WeightAtHigh: 0
+    WeightAtOne: 0
+    NoiseScale: 0.045
+    NoiseExponent: 1.2
+    NoiseOffset: {x: 0, y: 0}
   - TextureID: lake-muddy
-    MinHeight: 0.1
-    MaxHeight: 0.26
-    BlendRange: 0.08
-    Strength: 0.8
+    BaseWeight: 1
+    WeightAtZero: 0.7
+    WeightAtLow: 1
+    WeightAtMid: 0.1
+    WeightAtHigh: 0
+    WeightAtOne: 0
+    NoiseScale: 0.04
+    NoiseExponent: 1.4
+    NoiseOffset: {x: 29, y: 7}
+  - TextureID: lake-tidal-pools
+    BaseWeight: 0.8
+    WeightAtZero: 0.35
+    WeightAtLow: 0.95
+    WeightAtMid: 0.15
+    WeightAtHigh: 0
+    WeightAtOne: 0
+    NoiseScale: 0.05
+    NoiseExponent: 1.6
+    NoiseOffset: {x: 8, y: 41}
   - TextureID: grassy-plains-grass-soil
-    MinHeight: 0.2
-    MaxHeight: 0.4
-    BlendRange: 0.08
-    Strength: 0.85
+    BaseWeight: 1
+    WeightAtZero: 0.25
+    WeightAtLow: 0.95
+    WeightAtMid: 0.55
+    WeightAtHigh: 0.05
+    WeightAtOne: 0
+    NoiseScale: 0.032
+    NoiseExponent: 1.45
+    NoiseOffset: {x: 13, y: 17}
   - TextureID: grassy-plains-grass-b
-    MinHeight: 0.32
-    MaxHeight: 0.58
-    BlendRange: 0.1
-    Strength: 1
+    BaseWeight: 1.15
+    WeightAtZero: 0
+    WeightAtLow: 0.45
+    WeightAtMid: 1
+    WeightAtHigh: 0.45
+    WeightAtOne: 0.05
+    NoiseScale: 0.03
+    NoiseExponent: 1.3
+    NoiseOffset: {x: 39, y: 9}
+  - TextureID: grassy-plains-grass-a
+    BaseWeight: 0.95
+    WeightAtZero: 0
+    WeightAtLow: 0.1
+    WeightAtMid: 0.75
+    WeightAtHigh: 1
+    WeightAtOne: 0.2
+    NoiseScale: 0.028
+    NoiseExponent: 1.25
+    NoiseOffset: {x: 59, y: 21}
   - TextureID: rainforest-grass-moss
-    MinHeight: 0.5
-    MaxHeight: 0.74
-    BlendRange: 0.1
-    Strength: 0.9
+    BaseWeight: 0.95
+    WeightAtZero: 0
+    WeightAtLow: 0.05
+    WeightAtMid: 0.35
+    WeightAtHigh: 0.95
+    WeightAtOne: 0.3
+    NoiseScale: 0.024
+    NoiseExponent: 1.55
+    NoiseOffset: {x: 75, y: 31}
+  - TextureID: rainforest-grass-b
+    BaseWeight: 0.9
+    WeightAtZero: 0
+    WeightAtLow: 0.2
+    WeightAtMid: 0.85
+    WeightAtHigh: 0.7
+    WeightAtOne: 0.1
+    NoiseScale: 0.027
+    NoiseExponent: 1.4
+    NoiseOffset: {x: 93, y: 15}
+  - TextureID: rainforest-soil-rocks
+    BaseWeight: 0.8
+    WeightAtZero: 0
+    WeightAtLow: 0
+    WeightAtMid: 0.2
+    WeightAtHigh: 0.75
+    WeightAtOne: 0.9
+    NoiseScale: 0.05
+    NoiseExponent: 1.7
+    NoiseOffset: {x: 117, y: 43}
+  - TextureID: bush-heather
+    BaseWeight: 0.7
+    WeightAtZero: 0
+    WeightAtLow: 0.25
+    WeightAtMid: 0.7
+    WeightAtHigh: 0.6
+    WeightAtOne: 0.05
+    NoiseScale: 0.03
+    NoiseExponent: 1.8
+    NoiseOffset: {x: 24, y: 63}
+  - TextureID: bush-grass-soil
+    BaseWeight: 0.75
+    WeightAtZero: 0.2
+    WeightAtLow: 0.75
+    WeightAtMid: 0.8
+    WeightAtHigh: 0.15
+    WeightAtOne: 0
+    NoiseScale: 0.034
+    NoiseExponent: 1.45
+    NoiseOffset: {x: 46, y: 71}
+  - TextureID: bush-pebbles-b
+    BaseWeight: 0.85
+    WeightAtZero: 0
+    WeightAtLow: 0.1
+    WeightAtMid: 0.35
+    WeightAtHigh: 0.85
+    WeightAtOne: 0.75
+    NoiseScale: 0.055
+    NoiseExponent: 1.5
+    NoiseOffset: {x: 64, y: 87}
   - TextureID: scrub-pebbles-a
-    MinHeight: 0.68
-    MaxHeight: 0.84
-    BlendRange: 0.08
-    Strength: 0.75
+    BaseWeight: 1
+    WeightAtZero: 0
+    WeightAtLow: 0
+    WeightAtMid: 0.15
+    WeightAtHigh: 0.8
+    WeightAtOne: 0.95
+    NoiseScale: 0.058
+    NoiseExponent: 1.35
+    NoiseOffset: {x: 81, y: 55}
   - TextureID: scrub-pebbles-c
-    MinHeight: 0.8
-    MaxHeight: 1
-    BlendRange: 0.06
-    Strength: 1
+    BaseWeight: 1
+    WeightAtZero: 0
+    WeightAtLow: 0
+    WeightAtMid: 0.05
+    WeightAtHigh: 0.5
+    WeightAtOne: 1
+    NoiseScale: 0.065
+    NoiseExponent: 1.25
+    NoiseOffset: {x: 101, y: 97}
+  - TextureID: scrub-grass-dry
+    BaseWeight: 0.75
+    WeightAtZero: 0
+    WeightAtLow: 0.2
+    WeightAtMid: 0.55
+    WeightAtHigh: 0.65
+    WeightAtOne: 0.15
+    NoiseScale: 0.038
+    NoiseExponent: 1.6
+    NoiseOffset: {x: 121, y: 23}
