@@ -28,3 +28,4 @@ MonoBehaviour:
   InitialHeightModifier: {fileID: 5603040931237456233, guid: 949b1174f74eb4a06aacdaf6488d2637, type: 3}
   HeightPostProcessingModifier: {fileID: 8091210437315282119, guid: 5bfed2827ecc04215abe6a2bb39a4dce, type: 3}
   InitialPaintingModifier: {fileID: 5004641531269134249, guid: 11e7fa0b0b0b45d38f54fbfffe3d9bb3, type: 3}
+  PaintingPostProcessingModifier: {fileID: 0}

@@ -10,7 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5270184899559386010}
   - component: {fileID: -1361389991610562872}
-  - component: {fileID: 1484181452045987794}
+  - component: {fileID: 3330396227206592317}
+  - component: {fileID: 5174289416070978907}
   m_Layer: 0
   m_Name: HeightModifier_PostProcessing
   m_TagString: Untagged
@@ -50,7 +51,7 @@ MonoBehaviour:
   KernelSize: 5
   Stride: 1
   SmoothPasses: 6
---- !u!114 &1484181452045987794
+--- !u!114 &3330396227206592317
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -59,8 +60,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 8091210437315282119}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab714d3819b494f4986b5bc3333f4b80, type: 3}
+  m_Script: {fileID: 11500000, guid: 4895ce526389a4a5e84a75984593ad48, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RandomHeightMapModifier
-  Strength: 0.5
-  HeightDelta: 0.5
+  m_EditorClassIdentifier: Assembly-CSharp::GlobalSmoothHeightMapModifier
+  Strength: 1
+  KernelSize: 3
+  Stride: 1
+  SmoothPasses: 3
+--- !u!114 &5174289416070978907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8091210437315282119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb82915fa376a4f569922490ea20b36d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoiseHeightMapModifier
+  Strength: 1
+  amplitude: 0.5
+  xFrequency: 0.2
+  yFrequency: 0.2
+  octaves: 1
+  xLacunlarity: 2
+  yLacunlarity: 2
+  persistence: 0.5

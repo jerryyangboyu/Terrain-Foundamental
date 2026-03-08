@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6067498078781228716}
   - component: {fileID: -5519538125735983516}
   m_Layer: 0
-  m_Name: TerrainPainter_Scrub
+  m_Name: TerrainPainter_GrassyPlains
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,7 +45,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RandomTexturePainter
   Strength: 1
-  TextureIDs:
-  - scrub-pebbles-a
-  - scrub-pebbles-c
-  - scrub-grass-dry
+  PatchContrast: 2.2
+  TextureRules:
+  - TextureID: grassy-plains-grass-a
+    BaseWeight: 1.02
+    NoiseScale: 0.028
+    NoiseExponent: 1.25
+    NoiseOffset: {x: 0, y: 0}
+  - TextureID: grassy-plains-grass-b
+    BaseWeight: 1.15
+    NoiseScale: 0.03
+    NoiseExponent: 1.18
+    NoiseOffset: {x: 41, y: 9}
+  - TextureID: grassy-plains-grass-soil
+    BaseWeight: 0.75
+    NoiseScale: 0.034
+    NoiseExponent: 1.55
+    NoiseOffset: {x: 83, y: 21}

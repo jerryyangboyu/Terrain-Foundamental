@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6067498078781228716}
   - component: {fileID: -5519538125735983516}
   m_Layer: 0
-  m_Name: TerrainPainter_Bush
+  m_Name: TerrainPainter_Scrub
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,7 +45,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RandomTexturePainter
   Strength: 1
-  TextureIDs:
-  - bush-heather
-  - bush-grass-soil
-  - bush-pebbles-b
+  PatchContrast: 2.8
+  TextureRules:
+  - TextureID: scrub-pebbles-a
+    BaseWeight: 1.05
+    NoiseScale: 0.034
+    NoiseExponent: 1.45
+    NoiseOffset: {x: 0, y: 0}
+  - TextureID: scrub-pebbles-c
+    BaseWeight: 0.92
+    NoiseScale: 0.041
+    NoiseExponent: 1.62
+    NoiseOffset: {x: 43, y: 11}
+  - TextureID: scrub-grass-dry
+    BaseWeight: 0.72
+    NoiseScale: 0.028
+    NoiseExponent: 1.22
+    NoiseOffset: {x: 89, y: 27}

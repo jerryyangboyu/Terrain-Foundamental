@@ -45,7 +45,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RandomTexturePainter
   Strength: 1
-  TextureIDs:
-  - lake-tidal-pools
-  - lake-muddy
-  - lake-sand
+  PatchContrast: 3.2
+  TextureRules:
+  - TextureID: lake-sand
+    BaseWeight: 1.4
+    NoiseScale: 0.028
+    NoiseExponent: 1.05
+    NoiseOffset: {x: 0, y: 0}
+  - TextureID: bush-pebbles-b
+    BaseWeight: 0.74
+    NoiseScale: 0.031
+    NoiseExponent: 1.25
+    NoiseOffset: {x: 27, y: 11}
+  - TextureID: scrub-pebbles-a
+    BaseWeight: 0.9
+    NoiseScale: 0.034
+    NoiseExponent: 1.18
+    NoiseOffset: {x: 53, y: 19}
+  - TextureID: scrub-pebbles-c
+    BaseWeight: 0.68
+    NoiseScale: 0.038
+    NoiseExponent: 1.35
+    NoiseOffset: {x: 79, y: 31}

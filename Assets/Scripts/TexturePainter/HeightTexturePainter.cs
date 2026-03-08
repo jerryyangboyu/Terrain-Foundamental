@@ -4,24 +4,24 @@ using UnityEngine;
 public class HeightTextureRule
 {
     public string TextureID;
+    public bool IsExclusive;
     [Range(0f, 2f)] public float BaseWeight = 1f;
-    [Range(0f, 1f)] public float WeightAtZero = 0f;
     [Range(0f, 1f)] public float WeightAtLow = 0f;
     [Range(0f, 1f)] public float WeightAtMid = 0f;
     [Range(0f, 1f)] public float WeightAtHigh = 0f;
-    [Range(0f, 1f)] public float WeightAtOne = 0f;
+    [Range(0f, 1f)] public float WeightAtPeak = 0f;
     [Range(0.001f, 0.25f)] public float NoiseScale = 0.04f;
     [Range(0.5f, 4f)] public float NoiseExponent = 1.5f;
     public Vector2 NoiseOffset = Vector2.zero;
 }
 
-[System.Serializable]
 public class HeightTexturePainter : BaseTexturePainter
 {
-    private static readonly float[] HeightAnchors = { 0f, 0.25f, 0.5f, 0.75f, 1f };
+    private const float LowAnchorRatio = 0.3f;
+    private const float MidAnchorRatio = 0.65f;
 
-    [SerializeField] bool NormalizeAgainstCurrentTerrainRange = true;
     [SerializeField] HeightTextureRule[] TextureRules;
+    [SerializeField] [Range(0f, 1f)] float PeakStartHeight = 0.7f;
 
     public override void Execute(in TexturePainterContext context)
     {
@@ -31,7 +31,6 @@ public class HeightTexturePainter : BaseTexturePainter
             return;
         }
 
-        float terrainHeightSpan = context.MaxTerrainHeight - context.MinTerrainHeight;
         int[] ruleLayers = new int[TextureRules.Length];
         float[] ruleWeights = new float[TextureRules.Length];
 
@@ -49,47 +48,75 @@ public class HeightTexturePainter : BaseTexturePainter
 
         for (int y = 0; y < context.AlphaMapResolution; ++y)
         {
-            int heightMapY = Mathf.FloorToInt((float)y * context.MapResolution / context.AlphaMapResolution);
-
             for (int x = 0; x < context.AlphaMapResolution; ++x)
             {
-                int heightMapX = Mathf.FloorToInt((float)x * context.MapResolution / context.AlphaMapResolution);
-
-                if (context.BiomeIndex >= 0 && context.BiomeMap[heightMapX, heightMapY] != context.BiomeIndex)
+                if (!context.TargetsBiomeAtAlpha(x, y))
                     continue;
 
-                float sampledHeight = context.HeightMap[heightMapX, heightMapY];
-                if (NormalizeAgainstCurrentTerrainRange && terrainHeightSpan > Mathf.Epsilon)
-                {
-                    sampledHeight = Mathf.InverseLerp(context.MinTerrainHeight, context.MaxTerrainHeight, sampledHeight);
-                }
+                float sampledHeight = context.GetNormalizedHeightAtAlpha(x, y);
 
-                float totalWeight = 0f;
+                float totalRegularWeight = 0f;
+                int bestExclusiveRuleIndex = -1;
+                float bestExclusiveWeight = 0f;
+                float bestRegularWeight = 0f;
                 for (int ruleIndex = 0; ruleIndex < TextureRules.Length; ++ruleIndex)
                 {
-                    float ruleWeight = EvaluateTextureRule(TextureRules[ruleIndex], sampledHeight, x, y);
+                    HeightTextureRule rule = TextureRules[ruleIndex];
+                    float ruleWeight = EvaluateTextureRule(rule, sampledHeight, x, y);
                     ruleWeights[ruleIndex] = ruleWeight;
-                    totalWeight += ruleWeight;
+
+                    if (rule.IsExclusive)
+                    {
+                        if (ruleWeight > bestExclusiveWeight)
+                        {
+                            bestExclusiveWeight = ruleWeight;
+                            bestExclusiveRuleIndex = ruleIndex;
+                        }
+                    }
+                    else if (ruleWeight > bestRegularWeight)
+                    {
+                        bestRegularWeight = ruleWeight;
+                        totalRegularWeight += ruleWeight;
+                    }
+                    else
+                    {
+                        totalRegularWeight += ruleWeight;
+                    }
                 }
 
-                if (totalWeight <= Mathf.Epsilon)
+                if (bestExclusiveRuleIndex >= 0 && bestExclusiveWeight > bestRegularWeight)
+                {
+                    for (int ruleIndex = 0; ruleIndex < TextureRules.Length; ++ruleIndex)
+                    {
+                        int layerIndex = ruleLayers[ruleIndex];
+                        context.SetAlpha(x, y, layerIndex, 0f);
+                    }
+
+                    context.SetAlpha(x, y, ruleLayers[bestExclusiveRuleIndex], Strength);
+                    continue;
+                }
+
+                if (totalRegularWeight <= Mathf.Epsilon)
                     continue;
 
                 for (int ruleIndex = 0; ruleIndex < TextureRules.Length; ++ruleIndex)
                 {
+                    if (TextureRules[ruleIndex].IsExclusive)
+                        continue;
+
                     float ruleWeight = ruleWeights[ruleIndex];
                     if (ruleWeight <= Mathf.Epsilon)
                         continue;
 
                     int layerIndex = ruleLayers[ruleIndex];
-                    float contribution = Strength * (ruleWeight / totalWeight);
-                    context.AlphaMaps[x, y, layerIndex] = Mathf.Max(context.AlphaMaps[x, y, layerIndex], contribution);
+                    float contribution = Strength * (ruleWeight / totalRegularWeight);
+                    context.SetAlpha(x, y, layerIndex, Mathf.Max(context.GetAlpha(x, y, layerIndex), contribution));
                 }
             }
         }
     }
 
-    private static float EvaluateTextureRule(HeightTextureRule rule, float normalizedHeight, int x, int y)
+    private float EvaluateTextureRule(HeightTextureRule rule, float normalizedHeight, int x, int y)
     {
         float heightWeight = EvaluateHeightProfile(rule, normalizedHeight);
         if (heightWeight <= Mathf.Epsilon)
@@ -98,29 +125,23 @@ public class HeightTexturePainter : BaseTexturePainter
         return rule.BaseWeight * heightWeight * EvaluateRuleNoise(rule, x, y);
     }
 
-    private static float EvaluateHeightProfile(HeightTextureRule rule, float normalizedHeight)
+    private float EvaluateHeightProfile(HeightTextureRule rule, float normalizedHeight)
     {
         float clampedHeight = Mathf.Clamp01(normalizedHeight);
-        float[] weights =
-        {
-            rule.WeightAtZero,
-            rule.WeightAtLow,
-            rule.WeightAtMid,
-            rule.WeightAtHigh,
-            rule.WeightAtOne
-        };
+        float peakStartHeight = Mathf.Clamp(PeakStartHeight, 0.0001f, 0.9999f);
+        float lowHeight = peakStartHeight * LowAnchorRatio;
+        float midHeight = Mathf.Max(lowHeight + 0.0001f, peakStartHeight * MidAnchorRatio);
 
-        for (int anchorIndex = 0; anchorIndex < HeightAnchors.Length - 1; ++anchorIndex)
-        {
-            float minAnchor = HeightAnchors[anchorIndex];
-            float maxAnchor = HeightAnchors[anchorIndex + 1];
-            if (clampedHeight > maxAnchor)
-                continue;
+        if (clampedHeight <= lowHeight)
+            return rule.WeightAtLow;
 
-            return Mathf.Lerp(weights[anchorIndex], weights[anchorIndex + 1], Mathf.InverseLerp(minAnchor, maxAnchor, clampedHeight));
-        }
+        if (clampedHeight <= midHeight)
+            return Mathf.Lerp(rule.WeightAtLow, rule.WeightAtMid, Mathf.InverseLerp(lowHeight, midHeight, clampedHeight));
 
-        return weights[weights.Length - 1];
+        if (clampedHeight <= peakStartHeight)
+            return Mathf.Lerp(rule.WeightAtMid, rule.WeightAtHigh, Mathf.InverseLerp(midHeight, peakStartHeight, clampedHeight));
+
+        return Mathf.Lerp(rule.WeightAtHigh, rule.WeightAtPeak, Mathf.InverseLerp(peakStartHeight, 1f, clampedHeight));
     }
 
     private static float EvaluateRuleNoise(HeightTextureRule rule, int x, int y)
@@ -133,5 +154,4 @@ public class HeightTexturePainter : BaseTexturePainter
         float noise = Mathf.PerlinNoise(sampleX, sampleY);
         return Mathf.Pow(Mathf.Max(0.0001f, noise), rule.NoiseExponent);
     }
-
 }

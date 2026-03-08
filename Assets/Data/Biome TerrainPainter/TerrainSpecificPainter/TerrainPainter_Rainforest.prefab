@@ -45,7 +45,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RandomTexturePainter
   Strength: 1
-  TextureIDs:
-  - rainforest-grass-moss
-  - rainforest-grass-b
-  - rainforest-soil-rocks
+  PatchContrast: 2.5
+  TextureRules:
+  - TextureID: rainforest-grass-moss
+    BaseWeight: 1.1
+    NoiseScale: 0.024
+    NoiseExponent: 1.28
+    NoiseOffset: {x: 0, y: 0}
+  - TextureID: rainforest-grass-b
+    BaseWeight: 0.98
+    NoiseScale: 0.027
+    NoiseExponent: 1.36
+    NoiseOffset: {x: 31, y: 17}
+  - TextureID: rainforest-soil-rocks
+    BaseWeight: 0.62
+    NoiseScale: 0.043
+    NoiseExponent: 1.8
+    NoiseOffset: {x: 67, y: 39}

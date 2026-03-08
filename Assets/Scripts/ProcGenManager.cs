@@ -100,15 +100,14 @@ public class ProcGenManager : MonoBehaviour
         {
             for (int x = 0; x < alphaMapResolution; ++x)
             {
-                // flat -> y value is 1, vertical (pointing to side) -> y value is 0
                 float interpolatedX = (float)x / alphaMapResolution;
                 float interpolatedY = (float)y / alphaMapResolution;
-                slopeMap[x, y] = TargetTerrain.terrainData.GetInterpolatedNormal(interpolatedX, interpolatedY).y;
+                slopeMap[y, x] = TargetTerrain.terrainData.GetSteepness(interpolatedX, interpolatedY);
 
                 // zero out layer settings
                 for (int layerIndex = 0; layerIndex < TargetTerrain.terrainData.alphamapLayers; layerIndex++)
                 {
-                    alphaMaps[x, y, layerIndex] = 0;
+                    alphaMaps[y, x, layerIndex] = 0;
                 }
             }
         }
@@ -117,7 +116,6 @@ public class ProcGenManager : MonoBehaviour
             BiomeTexture2TerrainLayerIndex,
             mapResolution,
             heightMap,
-            TargetTerrain.terrainData.heightmapScale,
             slopeMap,
             alphaMaps,
             alphaMapResolution,
@@ -139,7 +137,7 @@ public class ProcGenManager : MonoBehaviour
             var biomeConfig = Config.Biomes[biomeIndex].Biome;
             if (biomeConfig.TerrainPainter == null) continue;
 
-            TexturePainterContext biomeContext = baseContext.WithBiome(BiomeMap, biomeIndex, biomeConfig);
+            TexturePainterContext biomeContext = baseContext.WithBiome(BiomeMap, biomeIndex);
             var modifiers = biomeConfig.TerrainPainter.GetComponents<BaseTexturePainter>();
             foreach(var modifier in modifiers)
             {

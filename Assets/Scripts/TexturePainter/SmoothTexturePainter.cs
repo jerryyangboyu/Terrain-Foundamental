@@ -1,16 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class TexturePainter_Smooth : BaseTexturePainter
+public class SmoothTexturePainter : BaseTexturePainter
 {
     [SerializeField] int SmoothingKernelSize = 5;
     
     public override void Execute(in TexturePainterContext context)
     {
-        if (context.BiomeMap != null)
+        if (context.BiomeIndex >= 0)
         {
-            Debug.LogError("TexturePainter_Smooth is not supported as a per biome modifier [" + gameObject.name + "]");
+            Debug.LogError("SmoothTexturePainter is not supported as a per biome modifier [" + gameObject.name + "]");
             return;
         }
 
@@ -38,7 +36,7 @@ public class TexturePainter_Smooth : BaseTexturePainter
                             if (workingX < 0 || workingX >= context.AlphaMapResolution)
                                 continue;
 
-                            alphaSum += context.AlphaMaps[workingX, workingY, layer];
+                            alphaSum += context.GetAlpha(workingX, workingY, layer);
                             ++numValues;
                         }                    
                     }
@@ -53,7 +51,7 @@ public class TexturePainter_Smooth : BaseTexturePainter
                 for (int x = 0; x < context.AlphaMapResolution; ++x)
                 {
                     // blend based on strength
-                    context.AlphaMaps[x, y, layer] = Mathf.Lerp(context.AlphaMaps[x, y, layer], smoothedAlphaMap[x, y], Strength);
+                    context.SetAlpha(x, y, layer, Mathf.Lerp(context.GetAlpha(x, y, layer), smoothedAlphaMap[x, y], Strength));
                 }
             }  
         }

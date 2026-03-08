@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6067498078781228716}
   - component: {fileID: -5519538125735983516}
   m_Layer: 0
-  m_Name: TerrainPainter_GrassyPlains
+  m_Name: TerrainPainter_Bush
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,7 +45,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RandomTexturePainter
   Strength: 1
-  TextureIDs:
-  - grassy-plains-grass-a
-  - grassy-plains-grass-b
-  - grassy-plains-grass-soil
+  PatchContrast: 2.4
+  TextureRules:
+  - TextureID: bush-heather
+    BaseWeight: 1
+    NoiseScale: 0.028
+    NoiseExponent: 1.3
+    NoiseOffset: {x: 0, y: 0}
+  - TextureID: bush-grass-soil
+    BaseWeight: 1.05
+    NoiseScale: 0.032
+    NoiseExponent: 1.45
+    NoiseOffset: {x: 37, y: 13}
+  - TextureID: bush-pebbles-b
+    BaseWeight: 0.78
+    NoiseScale: 0.038
+    NoiseExponent: 1.75
+    NoiseOffset: {x: 71, y: 29}
