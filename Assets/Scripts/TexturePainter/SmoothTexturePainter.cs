@@ -6,21 +6,21 @@ public class TexturePainter_Smooth : BaseTexturePainter
 {
     [SerializeField] int SmoothingKernelSize = 5;
     
-    public override void Execute(ProcGenManager manager, int mapResolution, float[,] heightMap, Vector3 heightmapScale, float[,] slopeMap, float[,,] alphaMaps, int alphaMapResolution, byte[,] biomeMap = null, int biomeIndex = -1, BiomeConfigSO biome = null)
+    public override void Execute(in TexturePainterContext context)
     {
-        if (biomeMap != null)
+        if (context.BiomeMap != null)
         {
             Debug.LogError("TexturePainter_Smooth is not supported as a per biome modifier [" + gameObject.name + "]");
             return;
         }
 
-        for (int layer = 0; layer < alphaMaps.GetLength(2); ++layer)
+        for (int layer = 0; layer < context.AlphaMaps.GetLength(2); ++layer)
         {
-            float[,] smoothedAlphaMap = new float[alphaMapResolution, alphaMapResolution];
+            float[,] smoothedAlphaMap = new float[context.AlphaMapResolution, context.AlphaMapResolution];
 
-            for (int y = 0; y < alphaMapResolution; ++y)
+            for (int y = 0; y < context.AlphaMapResolution; ++y)
             {
-                for (int x = 0; x < alphaMapResolution; ++x)
+                for (int x = 0; x < context.AlphaMapResolution; ++x)
                 {
                     float alphaSum = 0f;
                     int numValues = 0;
@@ -29,16 +29,16 @@ public class TexturePainter_Smooth : BaseTexturePainter
                     for (int yDelta = -SmoothingKernelSize; yDelta <= SmoothingKernelSize; ++yDelta)
                     {
                         int workingY = y + yDelta;
-                        if (workingY < 0 || workingY >= alphaMapResolution)
+                        if (workingY < 0 || workingY >= context.AlphaMapResolution)
                             continue;
 
                         for (int xDelta = -SmoothingKernelSize; xDelta <= SmoothingKernelSize; ++xDelta)
                         {
                             int workingX = x + xDelta;
-                            if (workingX < 0 || workingX >= alphaMapResolution)
+                            if (workingX < 0 || workingX >= context.AlphaMapResolution)
                                 continue;
 
-                            alphaSum += alphaMaps[workingX, workingY, layer];
+                            alphaSum += context.AlphaMaps[workingX, workingY, layer];
                             ++numValues;
                         }                    
                     }
@@ -48,12 +48,12 @@ public class TexturePainter_Smooth : BaseTexturePainter
                 }
             }
 
-            for (int y = 0; y < alphaMapResolution; ++y)
+            for (int y = 0; y < context.AlphaMapResolution; ++y)
             {
-                for (int x = 0; x < alphaMapResolution; ++x)
+                for (int x = 0; x < context.AlphaMapResolution; ++x)
                 {
                     // blend based on strength
-                    alphaMaps[x, y, layer] = Mathf.Lerp(alphaMaps[x, y, layer], smoothedAlphaMap[x, y], Strength);
+                    context.AlphaMaps[x, y, layer] = Mathf.Lerp(context.AlphaMaps[x, y, layer], smoothedAlphaMap[x, y], Strength);
                 }
             }  
         }

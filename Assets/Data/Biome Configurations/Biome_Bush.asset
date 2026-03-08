@@ -20,7 +20,7 @@ MonoBehaviour:
   UseCustomPreviewColor: 1
   PreviewColor: {r: 0.5450981, g: 0.2705882, b: 0.07450981, a: 1}
   HeightModifier: {fileID: 1459419569558651806, guid: febf9ab2eefae4e16b7196588571f297, type: 3}
-  TerrainPainter: {fileID: 6543067333105782680, guid: 79e2b5e096a2c4f3ea0fc1355355373b, type: 3}
+  TerrainPainter: {fileID: 0}
   Textures:
   - UniqueID: bush-heather
     Diffuse: {fileID: 2800000, guid: 87735acf16005914dba9087627517773, type: 3}

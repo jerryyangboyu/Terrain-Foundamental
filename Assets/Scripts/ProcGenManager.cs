@@ -93,7 +93,7 @@ public class ProcGenManager : MonoBehaviour
     {
         float[,] heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
         float[,,] alphaMaps = TargetTerrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
-
+        GetHeightRange(heightMap, out float minTerrainHeight, out float maxTerrainHeight);
         float[,] slopeMap = new float[alphaMapResolution, alphaMapResolution];
 
         for (int y = 0; y < alphaMapResolution; ++y)
@@ -113,15 +113,37 @@ public class ProcGenManager : MonoBehaviour
             }
         }
 
+        TexturePainterContext baseContext = new(
+            BiomeTexture2TerrainLayerIndex,
+            mapResolution,
+            heightMap,
+            TargetTerrain.terrainData.heightmapScale,
+            slopeMap,
+            alphaMaps,
+            alphaMapResolution,
+            minTerrainHeight: minTerrainHeight,
+            maxTerrainHeight: maxTerrainHeight);
+
+        if (Config.InitialPaintingModifier != null)
+        {
+            BaseTexturePainter[] modifiers = Config.InitialPaintingModifier.GetComponents<BaseTexturePainter>();
+
+            foreach (var modifier in modifiers)
+            {
+                modifier.Execute(baseContext);
+            }
+        }
+
         for (int biomeIndex = 0; biomeIndex < Config.Biomes.Count; ++biomeIndex)
         {
             var biomeConfig = Config.Biomes[biomeIndex].Biome;
             if (biomeConfig.TerrainPainter == null) continue;
 
+            TexturePainterContext biomeContext = baseContext.WithBiome(BiomeMap, biomeIndex, biomeConfig);
             var modifiers = biomeConfig.TerrainPainter.GetComponents<BaseTexturePainter>();
             foreach(var modifier in modifiers)
             {
-                modifier.Execute(this, mapResolution, heightMap, TargetTerrain.terrainData.heightmapScale, slopeMap, alphaMaps, alphaMapResolution, BiomeMap, biomeIndex, biomeConfig);
+                modifier.Execute(biomeContext);
             }
         }
 
@@ -132,11 +154,38 @@ public class ProcGenManager : MonoBehaviour
 
             foreach(var modifier in modifiers)
             {
-                modifier.Execute(this, mapResolution, heightMap, TargetTerrain.terrainData.heightmapScale, slopeMap, alphaMaps, alphaMapResolution);
+                modifier.Execute(baseContext);
             }    
         }
 
         TargetTerrain.terrainData.SetAlphamaps(0, 0, alphaMaps);
+    }
+
+    private static void GetHeightRange(float[,] heightMap, out float minHeight, out float maxHeight)
+    {
+        minHeight = float.MaxValue;
+        maxHeight = float.MinValue;
+
+        int width = heightMap.GetLength(0);
+        int height = heightMap.GetLength(1);
+        for (int y = 0; y < height; ++y)
+        {
+            for (int x = 0; x < width; ++x)
+            {
+                float sample = heightMap[x, y];
+                if (sample < minHeight)
+                    minHeight = sample;
+
+                if (sample > maxHeight)
+                    maxHeight = sample;
+            }
+        }
+
+        if (minHeight == float.MaxValue)
+        {
+            minHeight = 0f;
+            maxHeight = 1f;
+        }
     }
 
     private void PerformLayerSetup()
@@ -457,11 +506,6 @@ public class ProcGenManager : MonoBehaviour
             }
         }
 
-    }
-
-    public int GetLayerForTexture(string uniqueID)
-    {
-        return BiomeTexture2TerrainLayerIndex[uniqueID];
     }
 
     private bool CheckBoundaryValidity(Vector2Int location, int mapResolution)

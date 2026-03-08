@@ -20,7 +20,7 @@ MonoBehaviour:
   UseCustomPreviewColor: 1
   PreviewColor: {r: 0, g: 1, b: 0.4980392, a: 1}
   HeightModifier: {fileID: 1459419569558651806, guid: 81a7701ccb0664e40be020d03cd08dcb, type: 3}
-  TerrainPainter: {fileID: 6543067333105782680, guid: bddc2db826ff24ba0a4f6772f9a73a2f, type: 3}
+  TerrainPainter: {fileID: 0}
   Textures:
   - UniqueID: grassy-plains-grass-a
     Diffuse: {fileID: 2800000, guid: b39336e67b68db14aa4a8a7f883e5aff, type: 3}

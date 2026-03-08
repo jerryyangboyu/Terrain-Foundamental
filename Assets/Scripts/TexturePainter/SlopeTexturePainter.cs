@@ -7,23 +7,23 @@ public class TexturePainter_Slope : BaseTexturePainter
     [SerializeField] string TextureID;
     [SerializeField] AnimationCurve IntensityVsSlope;
 
-    public override void Execute(ProcGenManager manager, int mapResolution, float[,] heightMap, Vector3 heightmapScale, float[,] slopeMap, float[,,] alphaMaps, int alphaMapResolution, byte[,] biomeMap = null, int biomeIndex = -1, BiomeConfigSO biome = null)
+    public override void Execute(in TexturePainterContext context)
     {
-        int textureLayer = manager.GetLayerForTexture(TextureID);
+        int textureLayer = context.GetLayerForTexture(TextureID);
 
-        for (int y = 0; y < alphaMapResolution; ++y)
+        for (int y = 0; y < context.AlphaMapResolution; ++y)
         {
-            int heightMapY = Mathf.FloorToInt((float)y * (float)mapResolution / (float)alphaMapResolution);
+            int heightMapY = Mathf.FloorToInt((float)y * context.MapResolution / context.AlphaMapResolution);
 
-            for (int x = 0; x < alphaMapResolution; ++x)
+            for (int x = 0; x < context.AlphaMapResolution; ++x)
             {
-                int heightMapX = Mathf.FloorToInt((float)x * (float)mapResolution / (float)alphaMapResolution);
+                int heightMapX = Mathf.FloorToInt((float)x * context.MapResolution / context.AlphaMapResolution);
 
                 // skip if we have a biome and this is not our biome
-                if (biomeIndex >= 0 && biomeMap[heightMapX, heightMapY] != biomeIndex)
+                if (context.BiomeIndex >= 0 && context.BiomeMap[heightMapX, heightMapY] != context.BiomeIndex)
                     continue;
 
-                alphaMaps[x, y, textureLayer] = Strength * IntensityVsSlope.Evaluate(1f - slopeMap[x, y]);
+                context.AlphaMaps[x, y, textureLayer] = Strength * IntensityVsSlope.Evaluate(1f - context.SlopeMap[x, y]);
             }
         }        
     }

@@ -20,7 +20,7 @@ MonoBehaviour:
   UseCustomPreviewColor: 1
   PreviewColor: {r: 1, g: 0.6470588, b: 0, a: 1}
   HeightModifier: {fileID: 8271932033782440815, guid: 3607bbb7de0d1415484adad935634ea7, type: 3}
-  TerrainPainter: {fileID: 6543067333105782680, guid: 40b75ef2afedc479f8e2f3c628eb22bc, type: 3}
+  TerrainPainter: {fileID: 0}
   Textures:
   - UniqueID: scrub-pebbles-a
     Diffuse: {fileID: 2800000, guid: 5f61aa5f60d405a4b9f08becbe25d4c2, type: 3}
