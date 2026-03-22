@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5769678483108398802
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4725831025309667134}
+  - component: {fileID: -4384310805040432135}
+  m_Layer: 0
+  m_Name: ObjectPlacer_Scrub
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4725831025309667134
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5769678483108398802}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-4384310805040432135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5769678483108398802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d532fe7d6a094fd9ab3622fd0f2686e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RandomObjectPlacer
+  Strength: 1
+  PlacementRules:
+  - Prefab: {fileID: 8486787402013068894, guid: 9e8508e3025d9c844810b83c5607c09e, type: 3}
+    Weight: 2.4
+    UniformScaleRange: {x: 0.9, y: 1.25}
+    VerticalOffsetRange: {x: 0, y: 0.02}
+  - Prefab: {fileID: 1718442328122675833, guid: 3d4dd2affe15db043a6502ae256cd0d4, type: 3}
+    Weight: 2
+    UniformScaleRange: {x: 0.9, y: 1.2}
+    VerticalOffsetRange: {x: 0, y: 0.02}
+  - Prefab: {fileID: 5138664864039170994, guid: 8aa8def6286fc784ba128570ec475974, type: 3}
+    Weight: 1.5
+    UniformScaleRange: {x: 0.9, y: 1.15}
+    VerticalOffsetRange: {x: 0, y: 0.02}
+  - Prefab: {fileID: 5784118704813857101, guid: 176a42107ce66c44aa74a67424591597, type: 3}
+    Weight: 1.2
+    UniformScaleRange: {x: 0.95, y: 1.15}
+    VerticalOffsetRange: {x: 0, y: 0.03}
+  - Prefab: {fileID: 889445777815560387, guid: 054bf5cf244ff2e4083cbf8eca205cf0, type: 3}
+    Weight: 0.95
+    UniformScaleRange: {x: 0.95, y: 1.1}
+    VerticalOffsetRange: {x: 0, y: 0.03}
+  CellSize: 4.4
+  PlacementChance: 0.55
+  NormalizedHeightRange: {x: 0.28, y: 0.95}
+  SlopeRange: {x: 0, y: 32}
+  RotationYRange: {x: 0, y: 360}
+  AlignToSurfaceNormal: 1
+  SeedOffset: 37

@@ -1,16 +1,25 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using UnityEngine.SceneManagement;
+
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class ProcGenManager : MonoBehaviour
 {
     [SerializeField] ProcGenConfigSO Config;
     [SerializeField] Terrain TargetTerrain;
     [SerializeField] bool OutputBiomePngFiles = false;
-    [SerializeField] bool ShowBiomeOverlayInScene = true;
+    [SerializeField] bool UseSimpleBiomeVisualization = true;
     [SerializeField] bool RegenerateBiome = true;
+    [SerializeField] bool RegenerateLayers = true;
+    [SerializeField] bool RegenerateObjects = true;
+    [SerializeField] string GeneratedObjectsRootName = "_GeneratedObjects";
+
+    readonly Dictionary<string, int> BiomeTexture2TerrainLayerIndex = new();
 
     private static readonly Vector2Int[] NeighbourOffsets = new Vector2Int[]
     {
@@ -50,27 +59,286 @@ public class ProcGenManager : MonoBehaviour
     public void RegenerateWorld()
     {
         int baseMapResolution = (int) Config.biomeMapResolution;
-        int mapResolutionSize = TargetTerrain.terrainData.heightmapResolution;
+        int mapResolution = TargetTerrain.terrainData.heightmapResolution;
+        int alphamapResolution = TargetTerrain.terrainData.alphamapResolution;
         Color[] biomeColors = BuildBiomeColors();
 
         // Generate biome sections
-        PerformBiomeGeneration(baseMapResolution, mapResolutionSize);
+        PerformBiomeGeneration(baseMapResolution, mapResolution);
 
         // Optional save biome map to disk
         if (OutputBiomePngFiles)
         {
             OutputPngFile("BaseTerrainMap", BiomeMapLowResolution, baseMapResolution, biomeColors);
-            OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolutionSize, biomeColors);
+            OutputPngFile("UpScaleTerrainMap", BiomeMap, mapResolution, biomeColors);
         }
 
-        // Visualize by assigning a unique color to each biome
-        if (ShowBiomeOverlayInScene)
+        // Texture painting
+        if (UseSimpleBiomeVisualization)
         {
-            BiomeOverlayVisualizer.Instance.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolutionSize, biomeColors);
+            // Simple visualization by assigning a unique color to each biome
+            BiomeOverlayVisualizer.Instance.RenderOnTerrain(TargetTerrain, BiomeMap, mapResolution, biomeColors);
+        }
+        else if (RegenerateLayers)
+        {
+            PerformLayerSetup();
         }
 
         // Generate heightmap
-        PerformHeightMapModification(mapResolutionSize);
+        PerformHeightMapModification(mapResolution);
+
+        // Paint the terrain
+        PerformTerrainPainting(mapResolution, alphamapResolution);
+
+        if (RegenerateObjects)
+        {
+            PerformObjectPlacement(mapResolution);
+        }
+    }
+
+    private void PerformTerrainPainting(int mapResolution, int alphaMapResolution)
+    {
+        float[,] heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
+        float[,,] alphaMaps = TargetTerrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
+        GetHeightRange(heightMap, out float minTerrainHeight, out float maxTerrainHeight);
+        float[,] slopeMap = new float[alphaMapResolution, alphaMapResolution];
+
+        for (int y = 0; y < alphaMapResolution; ++y)
+        {
+            for (int x = 0; x < alphaMapResolution; ++x)
+            {
+                float interpolatedX = (float)x / alphaMapResolution;
+                float interpolatedY = (float)y / alphaMapResolution;
+                slopeMap[y, x] = TargetTerrain.terrainData.GetSteepness(interpolatedX, interpolatedY);
+
+                // zero out layer settings
+                for (int layerIndex = 0; layerIndex < TargetTerrain.terrainData.alphamapLayers; layerIndex++)
+                {
+                    alphaMaps[y, x, layerIndex] = 0;
+                }
+            }
+        }
+
+        TexturePainterContext baseContext = new(
+            BiomeTexture2TerrainLayerIndex,
+            mapResolution,
+            heightMap,
+            slopeMap,
+            alphaMaps,
+            alphaMapResolution,
+            minTerrainHeight: minTerrainHeight,
+            maxTerrainHeight: maxTerrainHeight);
+
+        if (Config.InitialPaintingModifier != null)
+        {
+            BaseTexturePainter[] modifiers = Config.InitialPaintingModifier.GetComponents<BaseTexturePainter>();
+
+            foreach (var modifier in modifiers)
+            {
+                modifier.Execute(baseContext);
+            }
+        }
+
+        for (int biomeIndex = 0; biomeIndex < Config.Biomes.Count; ++biomeIndex)
+        {
+            var biomeConfig = Config.Biomes[biomeIndex].Biome;
+            if (biomeConfig.TerrainPainter == null) continue;
+
+            TexturePainterContext biomeContext = baseContext.WithBiome(BiomeMap, biomeIndex);
+            var modifiers = biomeConfig.TerrainPainter.GetComponents<BaseTexturePainter>();
+            foreach(var modifier in modifiers)
+            {
+                modifier.Execute(biomeContext);
+            }
+        }
+
+        // run texture post processing
+        if (Config.PaintingPostProcessingModifier != null)
+        {
+            BaseTexturePainter[] modifiers = Config.PaintingPostProcessingModifier.GetComponents<BaseTexturePainter>();
+
+            foreach(var modifier in modifiers)
+            {
+                modifier.Execute(baseContext);
+            }    
+        }
+
+        TargetTerrain.terrainData.SetAlphamaps(0, 0, alphaMaps);
+    }
+
+    private static void GetHeightRange(float[,] heightMap, out float minHeight, out float maxHeight)
+    {
+        minHeight = float.MaxValue;
+        maxHeight = float.MinValue;
+
+        int width = heightMap.GetLength(0);
+        int height = heightMap.GetLength(1);
+        for (int y = 0; y < height; ++y)
+        {
+            for (int x = 0; x < width; ++x)
+            {
+                float sample = heightMap[x, y];
+                if (sample < minHeight)
+                    minHeight = sample;
+
+                if (sample > maxHeight)
+                    maxHeight = sample;
+            }
+        }
+
+        if (minHeight == float.MaxValue)
+        {
+            minHeight = 0f;
+            maxHeight = 1f;
+        }
+    }
+
+    private void PerformLayerSetup()
+    {
+        
+
+        // delete any existing layers
+        if (TargetTerrain.terrainData.terrainLayers != null || TargetTerrain.terrainData.terrainLayers.Length > 0)
+        {
+            Undo.RecordObject(TargetTerrain, "Clearing previous layers");
+            List<string> layersToDelete = new();
+            foreach (var layer in TargetTerrain.terrainData.terrainLayers)
+            {
+                if (layer == null) 
+                    continue;
+
+                layersToDelete.Add(AssetDatabase.GetAssetPath(layer));
+            }
+
+            TargetTerrain.terrainData.terrainLayers = null;
+
+            foreach (var layerFile in layersToDelete)
+            {
+                if (!string.IsNullOrEmpty(layerFile))
+                {
+                    AssetDatabase.DeleteAsset(layerFile);
+                }
+            }
+
+            Undo.FlushUndoRecordObjects();
+        }
+
+        string scenePath = System.IO.Path.GetDirectoryName(SceneManager.GetActiveScene().path);
+
+        List<TerrainLayer> newLayers = new();
+        foreach (var biomeMetaData in Config.Biomes)
+        {
+            var biome = biomeMetaData.Biome;
+            foreach (var biomeTexture in biome.Textures)
+            {
+                TerrainLayer textureLayer = biomeTexture.TemplateLayer != null
+                    ? Instantiate(biomeTexture.TemplateLayer)
+                    : new TerrainLayer();
+
+                textureLayer.name = "Layer_" + biome.Name + "_" + biomeTexture.UniqueID;
+
+                if (biomeTexture.Diffuse != null)
+                {
+                    textureLayer.diffuseTexture = biomeTexture.Diffuse;
+                }
+
+                if (biomeTexture.NormalMap != null)
+                {
+                    textureLayer.normalMapTexture = biomeTexture.NormalMap;
+                }
+
+                if (biomeTexture.MaskMap != null)
+                {
+                    textureLayer.maskMapTexture = biomeTexture.MaskMap;
+                }
+
+                // save to assets
+                string layerPath = System.IO.Path.Combine(scenePath, "Layer_" + biome.Name + "_" + biomeTexture.UniqueID + ".terrainlayer");
+                AssetDatabase.CreateAsset(textureLayer, layerPath);
+
+                // store mapping to layer index
+                BiomeTexture2TerrainLayerIndex[biomeTexture.UniqueID] = newLayers.Count;
+                newLayers.Add(textureLayer);
+            }
+        }
+
+        Undo.RecordObject(TargetTerrain.terrainData, "Updating terrain layers");
+        TargetTerrain.terrainData.terrainLayers = newLayers.ToArray();
+    }
+
+    private void PerformObjectPlacement(int mapResolution)
+    {
+        if (TargetTerrain == null || TargetTerrain.terrainData == null || Config == null || Config.Biomes == null)
+            return;
+
+        Transform generatedRoot = GetOrCreateGeneratedObjectsRoot();
+        ClearGeneratedObjects(generatedRoot);
+
+        float[,] heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
+        GetHeightRange(heightMap, out float minTerrainHeight, out float maxTerrainHeight);
+
+        ObjectPlacerContext baseContext = new(
+            TargetTerrain,
+            mapResolution,
+            BiomeMap,
+            -1,
+            generatedRoot,
+            minTerrainHeight,
+            maxTerrainHeight);
+
+        for (int biomeIndex = 0; biomeIndex < Config.Biomes.Count; ++biomeIndex)
+        {
+            BiomeConfigSO biomeConfig = Config.Biomes[biomeIndex].Biome;
+            if (biomeConfig == null || biomeConfig.ObjectPlacer == null)
+                continue;
+
+            BaseObjectPlacer[] placers = biomeConfig.ObjectPlacer.GetComponents<BaseObjectPlacer>();
+            if (placers == null || placers.Length == 0)
+                continue;
+
+            Transform biomeRoot = CreateBiomeObjectsRoot(generatedRoot, biomeConfig.Name);
+            ObjectPlacerContext biomeContext = baseContext.WithBiome(BiomeMap, biomeIndex, biomeRoot);
+            foreach (BaseObjectPlacer placer in placers)
+            {
+                placer.Execute(biomeContext);
+            }
+        }
+    }
+
+    private Transform GetOrCreateGeneratedObjectsRoot()
+    {
+        Transform root = transform.Find(GeneratedObjectsRootName);
+        if (root != null)
+            return root;
+
+        GameObject rootObject = new(GeneratedObjectsRootName);
+        root = rootObject.transform;
+        root.SetParent(transform, false);
+        return root;
+    }
+
+    private static void ClearGeneratedObjects(Transform generatedRoot)
+    {
+        if (generatedRoot == null)
+            return;
+
+        for (int childIndex = generatedRoot.childCount - 1; childIndex >= 0; --childIndex)
+        {
+            Transform child = generatedRoot.GetChild(childIndex);
+            if (child != null)
+            {
+                Undo.DestroyObjectImmediate(child.gameObject);
+            }
+        }
+    }
+
+    private static Transform CreateBiomeObjectsRoot(Transform parent, string biomeName)
+    {
+        string rootName = string.IsNullOrWhiteSpace(biomeName) ? "Biome" : biomeName;
+        GameObject biomeRootObject = new("Objects_" + rootName);
+        Transform biomeRoot = biomeRootObject.transform;
+        biomeRoot.SetParent(parent, false);
+        return biomeRoot;
     }
 
     private void PerformBiomeGeneration(int baseMapResolution, int mapResolutionSize)
