@@ -43,6 +43,8 @@ public class ProcGenManager : MonoBehaviour
     float[,] BiomeStrengths;
 #endif
 
+    public ProcGenConfigSO Configuration => Config;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

@@ -4,6 +4,8 @@ public class OffsetHeightMapModifier : BaseHeightMapModifier
 {
     [SerializeField] float OffsetAmount;
 
+    public float WorldOffsetAmount => OffsetAmount;
+
     public override void Execute(int mapResolutionSize, float[,] heightMap, Vector3 heightmapScale, byte[,] biomeMap, BiomeConfigSO biomeConfig, int biomeIndex)
     {
         for (int y = 0; y < mapResolutionSize; y++)

@@ -29,6 +29,11 @@ public class FirstPersonPlayerController : MonoBehaviour
     [Header("Spawn")]
     [SerializeField] float SpawnPadding = 32f;
     [SerializeField] float SpawnHeightOffset = 1f;
+    [SerializeField] float FallbackSeaLevelWorldY = 40f;
+    [SerializeField] int SpawnSearchAttempts = 24;
+
+    [Header("Development")]
+    [SerializeField] bool SpawnRandomlyOnPlay = true;
 
     CharacterController Controller;
     Transform CameraTransform;
@@ -43,9 +48,7 @@ public class FirstPersonPlayerController : MonoBehaviour
 
     void Awake()
     {
-        Controller = GetComponent<CharacterController>();
-        ConfigureCharacterController();
-        AttachSceneCamera();
+        EnsureRigSetup();
     }
 
     void OnEnable()
@@ -56,7 +59,10 @@ public class FirstPersonPlayerController : MonoBehaviour
 
     void Start()
     {
-        SpawnAtRandomTerrainPoint();
+        if (SpawnRandomlyOnPlay)
+        {
+            AdjustInitialPlayerLocation();
+        }
     }
 
     void Update()
@@ -82,6 +88,17 @@ public class FirstPersonPlayerController : MonoBehaviour
         Controller.radius = ControllerRadius;
         Controller.center = new Vector3(0f, ControllerHeight * 0.5f, 0f);
         Controller.minMoveDistance = 0f;
+    }
+
+    void EnsureRigSetup()
+    {
+        if (Controller == null)
+        {
+            Controller = GetComponent<CharacterController>();
+        }
+
+        ConfigureCharacterController();
+        AttachSceneCamera();
     }
 
     void AttachSceneCamera()
@@ -151,22 +168,103 @@ public class FirstPersonPlayerController : MonoBehaviour
         Vector3 terrainSize = terrainData.size;
         float maxPadding = Mathf.Max(0f, Mathf.Min(terrainSize.x, terrainSize.z) * 0.5f - 1f);
         float padding = Mathf.Min(SpawnPadding, maxPadding);
-        float spawnX = Random.Range(padding, terrainSize.x - padding);
-        float spawnZ = Random.Range(padding, terrainSize.z - padding);
-        float spawnY = terrain.SampleHeight(new Vector3(terrainOrigin.x + spawnX, 0f, terrainOrigin.z + spawnZ))
-            + terrainOrigin.y
-            + SpawnHeightOffset;
+        Vector3 spawnPosition = FindSpawnPosition(terrain, terrainOrigin, terrainSize, padding);
 
         bool wasEnabled = Controller.enabled;
         Controller.enabled = false;
         transform.SetPositionAndRotation(
-            new Vector3(terrainOrigin.x + spawnX, spawnY, terrainOrigin.z + spawnZ),
+            spawnPosition,
             Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
         Controller.enabled = wasEnabled;
 
         Pitch = 0f;
         CameraTransform.localPosition = new Vector3(0f, CameraHeight, 0f);
         CameraTransform.localRotation = Quaternion.identity;
+    }
+
+    public void AdjustInitialPlayerLocation()
+    {
+        EnsureRigSetup();
+        SpawnAtRandomTerrainPoint();
+    }
+
+    Vector3 FindSpawnPosition(Terrain terrain, Vector3 terrainOrigin, Vector3 terrainSize, float padding)
+    {
+        float preferredSeaLevelWorldY = ResolveSeaLevelWorldY();
+        Vector3 fallbackPosition = SampleSpawnPosition(terrain, terrainOrigin, terrainSize, padding, out _);
+        int attempts = Mathf.Max(1, SpawnSearchAttempts);
+
+        for (int i = 0; i < attempts; i++)
+        {
+            Vector3 candidate = SampleSpawnPosition(terrain, terrainOrigin, terrainSize, padding, out float groundHeight);
+            if (groundHeight >= preferredSeaLevelWorldY)
+            {
+                return candidate;
+            }
+        }
+
+        return fallbackPosition;
+    }
+
+    float ResolveSeaLevelWorldY()
+    {
+        ProcGenManager procGenManager = FindFirstObjectByType<ProcGenManager>();
+        ProcGenConfigSO procGenConfig = procGenManager != null ? procGenManager.Configuration : null;
+        if (procGenConfig == null)
+        {
+            return FallbackSeaLevelWorldY;
+        }
+
+        SetValueHeightMapModifier initialHeightModifier = procGenConfig.InitialHeightModifier != null
+            ? procGenConfig.InitialHeightModifier.GetComponent<SetValueHeightMapModifier>()
+            : null;
+        if (initialHeightModifier == null)
+        {
+            return FallbackSeaLevelWorldY;
+        }
+
+        BiomeConfigSO lakeBiome = null;
+        if (procGenConfig.Biomes != null)
+        {
+            foreach (BiomeConfig biomeConfig in procGenConfig.Biomes)
+            {
+                if (biomeConfig.Biome != null && string.Equals(biomeConfig.Biome.Name, "Lake", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    lakeBiome = biomeConfig.Biome;
+                    break;
+                }
+            }
+        }
+
+        if (lakeBiome?.HeightModifier == null)
+        {
+            return FallbackSeaLevelWorldY;
+        }
+
+        float seaLevelWorldY = initialHeightModifier.WorldTargetHeight;
+        OffsetHeightMapModifier[] lakeHeightOffsets = lakeBiome.HeightModifier.GetComponents<OffsetHeightMapModifier>();
+        if (lakeHeightOffsets.Length == 0)
+        {
+            return FallbackSeaLevelWorldY;
+        }
+
+        foreach (OffsetHeightMapModifier lakeHeightOffset in lakeHeightOffsets)
+        {
+            seaLevelWorldY += lakeHeightOffset.WorldOffsetAmount;
+        }
+
+        return seaLevelWorldY;
+    }
+
+    Vector3 SampleSpawnPosition(Terrain terrain, Vector3 terrainOrigin, Vector3 terrainSize, float padding, out float groundHeight)
+    {
+        float spawnX = Random.Range(padding, terrainSize.x - padding);
+        float spawnZ = Random.Range(padding, terrainSize.z - padding);
+        groundHeight = terrain.SampleHeight(new Vector3(terrainOrigin.x + spawnX, 0f, terrainOrigin.z + spawnZ))
+            + terrainOrigin.y;
+        float spawnY = groundHeight + SpawnHeightOffset;
+
+        return new Vector3(terrainOrigin.x + spawnX, spawnY, terrainOrigin.z + spawnZ);
     }
 
     void HandleCursorState()
