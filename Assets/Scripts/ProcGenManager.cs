@@ -16,6 +16,8 @@ public class ProcGenManager : MonoBehaviour
     [SerializeField] bool UseSimpleBiomeVisualization = true;
     [SerializeField] bool RegenerateBiome = true;
     [SerializeField] bool RegenerateLayers = true;
+    [SerializeField] bool RegenerateObjects = true;
+    [SerializeField] string GeneratedObjectsRootName = "_GeneratedObjects";
 
     readonly Dictionary<string, int> BiomeTexture2TerrainLayerIndex = new();
 
@@ -87,6 +89,11 @@ public class ProcGenManager : MonoBehaviour
 
         // Paint the terrain
         PerformTerrainPainting(mapResolution, alphamapResolution);
+
+        if (RegenerateObjects)
+        {
+            PerformObjectPlacement(mapResolution);
+        }
     }
 
     private void PerformTerrainPainting(int mapResolution, int alphaMapResolution)
@@ -224,11 +231,26 @@ public class ProcGenManager : MonoBehaviour
             var biome = biomeMetaData.Biome;
             foreach (var biomeTexture in biome.Textures)
             {
-                TerrainLayer textureLayer = new()
+                TerrainLayer textureLayer = biomeTexture.TemplateLayer != null
+                    ? Instantiate(biomeTexture.TemplateLayer)
+                    : new TerrainLayer();
+
+                textureLayer.name = "Layer_" + biome.Name + "_" + biomeTexture.UniqueID;
+
+                if (biomeTexture.Diffuse != null)
                 {
-                    diffuseTexture = biomeTexture.Diffuse,
-                    normalMapTexture = biomeTexture.NormalMap
-                };
+                    textureLayer.diffuseTexture = biomeTexture.Diffuse;
+                }
+
+                if (biomeTexture.NormalMap != null)
+                {
+                    textureLayer.normalMapTexture = biomeTexture.NormalMap;
+                }
+
+                if (biomeTexture.MaskMap != null)
+                {
+                    textureLayer.maskMapTexture = biomeTexture.MaskMap;
+                }
 
                 // save to assets
                 string layerPath = System.IO.Path.Combine(scenePath, "Layer_" + biome.Name + "_" + biomeTexture.UniqueID + ".terrainlayer");
@@ -242,6 +264,81 @@ public class ProcGenManager : MonoBehaviour
 
         Undo.RecordObject(TargetTerrain.terrainData, "Updating terrain layers");
         TargetTerrain.terrainData.terrainLayers = newLayers.ToArray();
+    }
+
+    private void PerformObjectPlacement(int mapResolution)
+    {
+        if (TargetTerrain == null || TargetTerrain.terrainData == null || Config == null || Config.Biomes == null)
+            return;
+
+        Transform generatedRoot = GetOrCreateGeneratedObjectsRoot();
+        ClearGeneratedObjects(generatedRoot);
+
+        float[,] heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
+        GetHeightRange(heightMap, out float minTerrainHeight, out float maxTerrainHeight);
+
+        ObjectPlacerContext baseContext = new(
+            TargetTerrain,
+            mapResolution,
+            BiomeMap,
+            -1,
+            generatedRoot,
+            minTerrainHeight,
+            maxTerrainHeight);
+
+        for (int biomeIndex = 0; biomeIndex < Config.Biomes.Count; ++biomeIndex)
+        {
+            BiomeConfigSO biomeConfig = Config.Biomes[biomeIndex].Biome;
+            if (biomeConfig == null || biomeConfig.ObjectPlacer == null)
+                continue;
+
+            BaseObjectPlacer[] placers = biomeConfig.ObjectPlacer.GetComponents<BaseObjectPlacer>();
+            if (placers == null || placers.Length == 0)
+                continue;
+
+            Transform biomeRoot = CreateBiomeObjectsRoot(generatedRoot, biomeConfig.Name);
+            ObjectPlacerContext biomeContext = baseContext.WithBiome(BiomeMap, biomeIndex, biomeRoot);
+            foreach (BaseObjectPlacer placer in placers)
+            {
+                placer.Execute(biomeContext);
+            }
+        }
+    }
+
+    private Transform GetOrCreateGeneratedObjectsRoot()
+    {
+        Transform root = transform.Find(GeneratedObjectsRootName);
+        if (root != null)
+            return root;
+
+        GameObject rootObject = new(GeneratedObjectsRootName);
+        root = rootObject.transform;
+        root.SetParent(transform, false);
+        return root;
+    }
+
+    private static void ClearGeneratedObjects(Transform generatedRoot)
+    {
+        if (generatedRoot == null)
+            return;
+
+        for (int childIndex = generatedRoot.childCount - 1; childIndex >= 0; --childIndex)
+        {
+            Transform child = generatedRoot.GetChild(childIndex);
+            if (child != null)
+            {
+                Undo.DestroyObjectImmediate(child.gameObject);
+            }
+        }
+    }
+
+    private static Transform CreateBiomeObjectsRoot(Transform parent, string biomeName)
+    {
+        string rootName = string.IsNullOrWhiteSpace(biomeName) ? "Biome" : biomeName;
+        GameObject biomeRootObject = new("Objects_" + rootName);
+        Transform biomeRoot = biomeRootObject.transform;
+        biomeRoot.SetParent(parent, false);
+        return biomeRoot;
     }
 
     private void PerformBiomeGeneration(int baseMapResolution, int mapResolutionSize)

@@ -21,16 +21,25 @@ MonoBehaviour:
   PreviewColor: {r: 1, g: 0.6470588, b: 0, a: 1}
   HeightModifier: {fileID: 8271932033782440815, guid: 3607bbb7de0d1415484adad935634ea7, type: 3}
   TerrainPainter: {fileID: 0}
+  ObjectPlacer: {fileID: 5769678483108398802, guid: 1b080d4d91f9c43969e526a215bf3d60, type: 3}
   Textures:
   - UniqueID: scrub-pebbles-a
+    TemplateLayer: {fileID: 8574412962073106934, guid: a4f389caed25e6241b38ba88a286c911, type: 2}
     Diffuse: {fileID: 2800000, guid: 5f61aa5f60d405a4b9f08becbe25d4c2, type: 3}
     NormalMap: {fileID: 2800000, guid: 00eadd7ea2cbbf14ca338babf410bdf4, type: 3}
+    MaskMap: {fileID: 2800000, guid: 8abd4e7f6f86e8b4cb4820fea28b8f34, type: 3}
   - UniqueID: scrub-pebbles-c
+    TemplateLayer: {fileID: 8574412962073106934, guid: a579e897aa6ba004ab0e04fa3053263a, type: 2}
     Diffuse: {fileID: 2800000, guid: 8e255f57d15705e488d4db5425239501, type: 3}
     NormalMap: {fileID: 2800000, guid: 297a3ddfc901318499e15b3a0c8ec74d, type: 3}
+    MaskMap: {fileID: 2800000, guid: 37bf2efdabb269f4b891344af9233d9e, type: 3}
   - UniqueID: scrub-grass-dry
+    TemplateLayer: {fileID: 8574412962073106934, guid: 0cbb01b61ed524a48a119d81aa262fed, type: 2}
     Diffuse: {fileID: 2800000, guid: 7e6fff2112f33d748962082012d11cce, type: 3}
     NormalMap: {fileID: 2800000, guid: d835c61db4c94444eabef9cf95e8a7c4, type: 3}
+    MaskMap: {fileID: 2800000, guid: 9f2c593ad6e69ad4ab880e57ce9b69d6, type: 3}
   - UniqueID: snow
+    TemplateLayer: {fileID: 8574412962073106934, guid: 59b98ca43f27d8c4a89d4058d2a962e5, type: 2}
     Diffuse: {fileID: 2800000, guid: ffa01093856b873448237de84289ee85, type: 3}
     NormalMap: {fileID: 2800000, guid: baca4d94b1d1d8046ab52ce1570a24c7, type: 3}
+    MaskMap: {fileID: 2800000, guid: 5d46f74cdeedd7941ba8cd7cb7ebb40c, type: 3}

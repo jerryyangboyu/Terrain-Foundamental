@@ -21,13 +21,20 @@ MonoBehaviour:
   PreviewColor: {r: 0, g: 1, b: 0.4980392, a: 1}
   HeightModifier: {fileID: 1459419569558651806, guid: 81a7701ccb0664e40be020d03cd08dcb, type: 3}
   TerrainPainter: {fileID: 0}
+  ObjectPlacer: {fileID: 3199918224766346594, guid: 8bc9d090c9b914c94bfbf37fc013e13f, type: 3}
   Textures:
   - UniqueID: grassy-plains-grass-a
+    TemplateLayer: {fileID: 8574412962073106934, guid: 130d104513b29bd44ae9c5b3915f4134, type: 2}
     Diffuse: {fileID: 2800000, guid: b39336e67b68db14aa4a8a7f883e5aff, type: 3}
     NormalMap: {fileID: 2800000, guid: a8a2fc863627f464e838ba616a1d5789, type: 3}
+    MaskMap: {fileID: 2800000, guid: bd4c61d030690814097a2076498d1c75, type: 3}
   - UniqueID: grassy-plains-grass-b
+    TemplateLayer: {fileID: 8574412962073106934, guid: bd1fcb10d2c5b5d4ba6e01a34e4735be, type: 2}
     Diffuse: {fileID: 2800000, guid: e318f31bebce62d48a648da3f8ba56c9, type: 3}
     NormalMap: {fileID: 2800000, guid: eb70932bab3d971408c011dbb45767a9, type: 3}
+    MaskMap: {fileID: 2800000, guid: 0f48eac8617d0de4cbc056e1734e798b, type: 3}
   - UniqueID: grassy-plains-grass-soil
+    TemplateLayer: {fileID: 8574412962073106934, guid: 62f82665abc6fbf4e8f7fa058cbd8d6c, type: 2}
     Diffuse: {fileID: 2800000, guid: bde7423cb35c64746b6b24c63040dcb0, type: 3}
     NormalMap: {fileID: 2800000, guid: b5fff5575723f4a40bfa0f147cb9c27f, type: 3}
+    MaskMap: {fileID: 2800000, guid: 61a6ad6be0be2b444addf88107c0fda2, type: 3}

@@ -23,11 +23,17 @@ MonoBehaviour:
   TerrainPainter: {fileID: 6543067333105782680, guid: 6115512b3ed5041ad932e6d5f333196d, type: 3}
   Textures:
   - UniqueID: lake-tidal-pools
+    TemplateLayer: {fileID: 8574412962073106934, guid: b5fcb6edb24b4544dbcf0dad9462ee5b, type: 2}
     Diffuse: {fileID: 2800000, guid: 65c50b065f264b042a12153fb6454aa5, type: 3}
     NormalMap: {fileID: 2800000, guid: 28b218fb0e12c994d8f0b586f65545f2, type: 3}
+    MaskMap: {fileID: 2800000, guid: e39c4b98a4756b043a23fb5b81e7b25a, type: 3}
   - UniqueID: lake-muddy
+    TemplateLayer: {fileID: 8574412962073106934, guid: 091511b8c4f042c4082a4d5af73e92c7, type: 2}
     Diffuse: {fileID: 2800000, guid: 311fa94216ea77342a20e99b01ed6e69, type: 3}
     NormalMap: {fileID: 2800000, guid: 86f7d07dde38b154188fd60359df541e, type: 3}
+    MaskMap: {fileID: 2800000, guid: 69ac4ffc59a4b194c9f03bec38be51ae, type: 3}
   - UniqueID: lake-sand
+    TemplateLayer: {fileID: 8574412962073106934, guid: 1ded3ba1c5a90054e8f23ddfa62fb2b7, type: 2}
     Diffuse: {fileID: 2800000, guid: e18ae12a8286a594bae0eb036ce9bc12, type: 3}
     NormalMap: {fileID: 2800000, guid: 83f03b3c2b2d5df40898d8c2123239ae, type: 3}
+    MaskMap: {fileID: 2800000, guid: 32c701976955001429b200f33da0d4a9, type: 3}
