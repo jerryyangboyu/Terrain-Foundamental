@@ -85,6 +85,9 @@ public class RandomObjectPlacer : BaseObjectPlacer
                 if (!context.TargetsBiomeAtNormalized(normalizedX, normalizedY))
                     continue;
 
+                if (context.IsBelowSeaLevel(normalizedX, normalizedY))
+                    continue;
+
                 float normalizedHeight = context.GetNormalizedHeight(normalizedX, normalizedY);
                 if (normalizedHeight < heightRange.x || normalizedHeight > heightRange.y)
                     continue;

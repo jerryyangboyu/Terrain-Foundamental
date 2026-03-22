@@ -9,9 +9,22 @@ public static class LakeWaterLevelResolver
 
     public static float ResolveSeaLevelWorldY(ProcGenConfigSO procGenConfig, float fallbackWorldY)
     {
+        return TryResolveSeaLevelWorldY(procGenConfig, out float seaLevelWorldY)
+            ? seaLevelWorldY
+            : fallbackWorldY;
+    }
+
+    public static bool TryResolveSeaLevelWorldY(ProcGenManager procGenManager, out float seaLevelWorldY)
+    {
+        return TryResolveSeaLevelWorldY(procGenManager != null ? procGenManager.Configuration : null, out seaLevelWorldY);
+    }
+
+    public static bool TryResolveSeaLevelWorldY(ProcGenConfigSO procGenConfig, out float seaLevelWorldY)
+    {
+        seaLevelWorldY = 0f;
         if (procGenConfig == null)
         {
-            return fallbackWorldY;
+            return false;
         }
 
         SetValueHeightMapModifier initialHeightModifier = procGenConfig.InitialHeightModifier != null
@@ -19,28 +32,28 @@ public static class LakeWaterLevelResolver
             : null;
         if (initialHeightModifier == null)
         {
-            return fallbackWorldY;
+            return false;
         }
 
         BiomeConfigSO lakeBiome = FindLakeBiome(procGenConfig);
         if (lakeBiome?.HeightModifier == null)
         {
-            return fallbackWorldY;
+            return false;
         }
 
-        float seaLevelWorldY = initialHeightModifier.WorldTargetHeight;
         OffsetHeightMapModifier[] lakeHeightOffsets = lakeBiome.HeightModifier.GetComponents<OffsetHeightMapModifier>();
         if (lakeHeightOffsets.Length == 0)
         {
-            return fallbackWorldY;
+            return false;
         }
 
+        seaLevelWorldY = initialHeightModifier.WorldTargetHeight;
         foreach (OffsetHeightMapModifier lakeHeightOffset in lakeHeightOffsets)
         {
             seaLevelWorldY += lakeHeightOffset.WorldOffsetAmount;
         }
 
-        return seaLevelWorldY;
+        return true;
     }
 
     static BiomeConfigSO FindLakeBiome(ProcGenConfigSO procGenConfig)

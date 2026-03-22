@@ -278,6 +278,9 @@ public class ProcGenManager : MonoBehaviour
 
         float[,] heightMap = TargetTerrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
         GetHeightRange(heightMap, out float minTerrainHeight, out float maxTerrainHeight);
+        float seaLevelWorldY = LakeWaterLevelResolver.TryResolveSeaLevelWorldY(Config, out float resolvedSeaLevelWorldY)
+            ? resolvedSeaLevelWorldY
+            : float.NegativeInfinity;
 
         ObjectPlacerContext baseContext = new(
             TargetTerrain,
@@ -286,7 +289,8 @@ public class ProcGenManager : MonoBehaviour
             -1,
             generatedRoot,
             minTerrainHeight,
-            maxTerrainHeight);
+            maxTerrainHeight,
+            seaLevelWorldY);
 
         for (int biomeIndex = 0; biomeIndex < Config.Biomes.Count; ++biomeIndex)
         {
