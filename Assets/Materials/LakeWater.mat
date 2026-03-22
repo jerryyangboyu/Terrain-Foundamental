@@ -32,6 +32,8 @@ Material:
     - _NormalStrength: 0.7
     - _NormalTiling: 0.55
     - _Opacity: 0.88
+    - _ShorelineWashDistance: 1.8
+    - _ShorelineWashStrength: 1.05
     - _WaveAmplitude: 0.08
     - _WaveFrequency: 1.25
     - _WaveSpeed: 0.45

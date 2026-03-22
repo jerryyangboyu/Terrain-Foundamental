@@ -9,6 +9,8 @@ Shader "Custom/LakeWater"
         _Opacity ("Opacity", Range(0, 1)) = 0.78
         _DepthFadeDistance ("Depth Fade Distance", Range(0.1, 20)) = 4.0
         _FoamDistance ("Foam Distance", Range(0.01, 4)) = 0.65
+        _ShorelineWashDistance ("Shoreline Wash Distance", Range(0.1, 8)) = 1.8
+        _ShorelineWashStrength ("Shoreline Wash Strength", Range(0, 2)) = 0.95
         _WaveAmplitude ("Wave Amplitude", Range(0, 0.4)) = 0.08
         _WaveFrequency ("Wave Frequency", Range(0.1, 4)) = 1.25
         _WaveSpeed ("Wave Speed", Range(0, 3)) = 0.45
@@ -69,6 +71,8 @@ Shader "Custom/LakeWater"
                 half _Opacity;
                 half _DepthFadeDistance;
                 half _FoamDistance;
+                half _ShorelineWashDistance;
+                half _ShorelineWashStrength;
                 half _WaveAmplitude;
                 half _WaveFrequency;
                 half _WaveSpeed;
@@ -184,6 +188,14 @@ Shader "Custom/LakeWater"
                 float depthFactor = saturate(waterDepth / max(_DepthFadeDistance, 0.001));
                 float foamBand = 1.0 - smoothstep(0.0, max(_FoamDistance, 0.001), waterDepth);
                 float foamNoise = smoothstep(0.42, 0.8, FractalNoise(input.positionWS.xz * 1.5 + time * 0.3));
+                float shorelineDistance = max(_ShorelineWashDistance, _FoamDistance);
+                float shorelineMask = 1.0 - smoothstep(0.0, shorelineDistance, waterDepth);
+                float shorelineNoise = FractalNoise(input.positionWS.xz * 0.18 + float2(time * 0.06, -time * 0.04));
+                float shorelinePhase = (waterDepth / shorelineDistance) * 2.35 - time * max(_WaveSpeed, 0.05) * 0.55 + shorelineNoise * 0.45;
+                float shorelineWave = abs(frac(shorelinePhase) * 2.0 - 1.0);
+                float shorelineBreak = shorelineMask * smoothstep(0.32, 0.0, shorelineWave);
+                shorelineBreak *= saturate((1.0 - depthFactor) * 1.2) * _ShorelineWashStrength;
+                float foamMask = saturate(max(foamBand * foamNoise, shorelineBreak));
 
                 float3 normalWS = WaveNormal(input.positionWS.xz, time);
                 float3 viewDirWS = normalize(input.viewDirWS);
@@ -191,9 +203,11 @@ Shader "Custom/LakeWater"
 
                 half3 baseColor = lerp(_ShallowColor.rgb, _DeepColor.rgb, depthFactor);
                 baseColor = lerp(baseColor, _ReflectionColor.rgb, saturate(fresnel));
-                baseColor += foamBand * foamNoise * _FoamColor.rgb * 0.35;
+                baseColor += foamBand * foamNoise * _FoamColor.rgb * 0.3;
+                baseColor += shorelineBreak * _FoamColor.rgb * 0.65;
+                baseColor = lerp(baseColor, _FoamColor.rgb, shorelineBreak * 0.18);
 
-                half alpha = saturate(_Opacity * lerp(0.45, 1.0, depthFactor) + fresnel * 0.18 + foamBand * foamNoise * 0.2);
+                half alpha = saturate(_Opacity * lerp(0.45, 1.0, depthFactor) + fresnel * 0.18 + foamMask * 0.22);
                 half3 finalColor = MixFog(baseColor, input.fogFactor);
 
                 return half4(finalColor, alpha);

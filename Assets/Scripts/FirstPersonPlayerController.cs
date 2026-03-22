@@ -209,51 +209,7 @@ public class FirstPersonPlayerController : MonoBehaviour
     float ResolveSeaLevelWorldY()
     {
         ProcGenManager procGenManager = FindFirstObjectByType<ProcGenManager>();
-        ProcGenConfigSO procGenConfig = procGenManager != null ? procGenManager.Configuration : null;
-        if (procGenConfig == null)
-        {
-            return FallbackSeaLevelWorldY;
-        }
-
-        SetValueHeightMapModifier initialHeightModifier = procGenConfig.InitialHeightModifier != null
-            ? procGenConfig.InitialHeightModifier.GetComponent<SetValueHeightMapModifier>()
-            : null;
-        if (initialHeightModifier == null)
-        {
-            return FallbackSeaLevelWorldY;
-        }
-
-        BiomeConfigSO lakeBiome = null;
-        if (procGenConfig.Biomes != null)
-        {
-            foreach (BiomeConfig biomeConfig in procGenConfig.Biomes)
-            {
-                if (biomeConfig.Biome != null && string.Equals(biomeConfig.Biome.Name, "Lake", System.StringComparison.OrdinalIgnoreCase))
-                {
-                    lakeBiome = biomeConfig.Biome;
-                    break;
-                }
-            }
-        }
-
-        if (lakeBiome?.HeightModifier == null)
-        {
-            return FallbackSeaLevelWorldY;
-        }
-
-        float seaLevelWorldY = initialHeightModifier.WorldTargetHeight;
-        OffsetHeightMapModifier[] lakeHeightOffsets = lakeBiome.HeightModifier.GetComponents<OffsetHeightMapModifier>();
-        if (lakeHeightOffsets.Length == 0)
-        {
-            return FallbackSeaLevelWorldY;
-        }
-
-        foreach (OffsetHeightMapModifier lakeHeightOffset in lakeHeightOffsets)
-        {
-            seaLevelWorldY += lakeHeightOffset.WorldOffsetAmount;
-        }
-
-        return seaLevelWorldY;
+        return LakeWaterLevelResolver.ResolveSeaLevelWorldY(procGenManager, FallbackSeaLevelWorldY);
     }
 
     Vector3 SampleSpawnPosition(Terrain terrain, Vector3 terrainOrigin, Vector3 terrainSize, float padding, out float groundHeight)
