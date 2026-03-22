@@ -4,6 +4,8 @@ public class SetValueHeightMapModifier: BaseHeightMapModifier
 {
     [SerializeField] float TargetHeight;
 
+    public float WorldTargetHeight => TargetHeight;
+
     public override void Execute(int mapResolutionSize, float[,] heightMap, Vector3 heightmapScale, byte[,] biomeMap, BiomeConfigSO biomeConfig, int biomeIndex)
     {
         for (int y = 0; y < mapResolutionSize; y++)

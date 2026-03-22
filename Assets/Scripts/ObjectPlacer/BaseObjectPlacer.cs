@@ -10,6 +10,7 @@ public readonly struct ObjectPlacerContext
     public readonly Transform Parent;
     public readonly float MinTerrainHeight;
     public readonly float MaxTerrainHeight;
+    public readonly float SeaLevelWorldY;
 
     public ObjectPlacerContext(
         Terrain targetTerrain,
@@ -18,7 +19,8 @@ public readonly struct ObjectPlacerContext
         int biomeIndex,
         Transform parent,
         float minTerrainHeight = 0f,
-        float maxTerrainHeight = 1f)
+        float maxTerrainHeight = 1f,
+        float seaLevelWorldY = float.NegativeInfinity)
     {
         TargetTerrain = targetTerrain;
         TerrainData = targetTerrain != null ? targetTerrain.terrainData : null;
@@ -28,6 +30,7 @@ public readonly struct ObjectPlacerContext
         Parent = parent;
         MinTerrainHeight = minTerrainHeight;
         MaxTerrainHeight = maxTerrainHeight;
+        SeaLevelWorldY = seaLevelWorldY;
     }
 
     public ObjectPlacerContext WithBiome(byte[,] biomeMap, int biomeIndex, Transform parent)
@@ -39,7 +42,8 @@ public readonly struct ObjectPlacerContext
             biomeIndex,
             parent,
             MinTerrainHeight,
-            MaxTerrainHeight);
+            MaxTerrainHeight,
+            SeaLevelWorldY);
     }
 
     public bool TargetsBiomeAtNormalized(float normalizedX, float normalizedY)
@@ -90,6 +94,21 @@ public readonly struct ObjectPlacerContext
             terrainPosition.x + (clampedX * terrainSize.x),
             worldHeight,
             terrainPosition.z + (clampedY * terrainSize.z));
+    }
+
+    public float GetSurfaceWorldHeight(float normalizedX, float normalizedY)
+    {
+        if (TargetTerrain == null || TerrainData == null)
+            return 0f;
+
+        return TargetTerrain.transform.position.y + TerrainData.GetInterpolatedHeight(
+            Mathf.Clamp01(normalizedX),
+            Mathf.Clamp01(normalizedY));
+    }
+
+    public bool IsBelowSeaLevel(float normalizedX, float normalizedY)
+    {
+        return GetSurfaceWorldHeight(normalizedX, normalizedY) < SeaLevelWorldY;
     }
 
     private int GetMapX(float normalizedX)
